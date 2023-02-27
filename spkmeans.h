@@ -13,7 +13,9 @@ typedef struct vector
 }vector;
 
 double** wam(double **dataPoints);
+
 double** ddg(double **dataPoints);
+
 double** gl(double **dataPoints);
 
 # endif
