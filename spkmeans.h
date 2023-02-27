@@ -1,17 +1,17 @@
 # ifndef SPKMEANS_H_
 # define SPKMEANS_H_
 
-struct cord
+typedef struct cord
 {
     double value;
     struct cord *next;
-};
-struct vector
+}cord;
+typedef struct vector
 {
     struct vector *next;
     struct cord *cords;
-};
+}vector;
 
-public **double wam(**double dataPoints)
+double** wam(double **dataPoints);
 
 # endif
