@@ -33,6 +33,8 @@ double **wam(double **dataPoints, int len){
              }
         }
     }
+
+    return w;
 }
 
 void main(){
