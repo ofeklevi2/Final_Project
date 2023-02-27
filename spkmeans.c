@@ -37,6 +37,14 @@ double **wam(double **dataPoints, int len){
     return w;
 }
 
+void free_arr(double **arr, int len){ //frees 2d array 
+    int i;
+    for (i=0; i<len; i++){
+        free(arr[i]);
+    }
+    free(arr);
+}
+
 void main(){
     double *x1 = malloc(3 * sizeof(double));
     double *x2 = malloc(3 * sizeof(double));
