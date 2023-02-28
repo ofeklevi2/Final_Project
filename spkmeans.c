@@ -20,11 +20,12 @@ void print_2D_Array(double **arr, int len){
     }
 }
 
-void free_2D_Array(double **arr, int len){
+void free_arr(double **arr, int len){
     int i, j;
     for (i = 0; i < len; i++){
         free(arr[i]);
     }
+    free(arr);
 }
 
 double distance(double *xi, double *xj, int len){
