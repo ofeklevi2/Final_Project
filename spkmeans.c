@@ -20,14 +20,6 @@ void print_2D_Array(double **arr, int len){
     }
 }
 
-void free_arr(double **arr, int len){
-    int i, j;
-    for (i = 0; i < len; i++){
-        free(arr[i]);
-    }
-    free(arr);
-}
-
 double distance(double *xi, double *xj, int len){
     int i;
     double sum =0;
@@ -59,6 +51,7 @@ double **wam(double **dataPoints, int len){
 
     return w;
 }
+
 
 double **ddg(double **dataPoints, int len){
     int i, j;
@@ -95,6 +88,19 @@ double **gl(double **dataPoints, int len){
     return gl_Matrix;
 }
 
-int main(){
-    return 0;
+void free_arr(double **arr, int len){ //frees 2d array 
+    int i;
+    for (i=0; i<len; i++){
+        free(arr[i]);
+    }
+    free(arr);
+}
+
+void main(){
+    double *x1 = malloc(3 * sizeof(double));
+    double *x2 = malloc(3 * sizeof(double));
+    x1[0] = 1.0, x1[1] = 2., x1[2] = 3.;
+    x2[0] = 2., x2[1] = 3., x2[2] = 4.;
+    double res = distance(x1, x2, 3);
+    printf("%lf\n", res);
 }
