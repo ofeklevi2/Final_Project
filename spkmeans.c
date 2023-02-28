@@ -3,7 +3,22 @@
 # include <math.h>
 #include "spkmeans.h"
 
+void print_1D_Array(double *arr, int len){
+    int i;
+    for (i = 0; i < len; i++){
+        printf("%lf ", arr[i]);
+    }
+}
 
+void print_2D_Array(double **arr, int len){
+    int i, j;
+    for (i = 0; i < len; i++){
+        for (j = 0; j < len; j++){
+            printf("%lf ", arr[i][j]);
+        }
+        printf("\n");
+    }
+}
 
 double distance(double *xi, double *xj, int len){
     int i;
@@ -35,6 +50,42 @@ double **wam(double **dataPoints, int len){
     }
 
     return w;
+}
+
+
+double **ddg(double **dataPoints, int len){
+    int i, j;
+    double **w = wam(dataPoints, len);
+    double **diagonal_Degree_Matrix = (double**)malloc(len * sizeof(double*));
+    for (int i =0; i < len; i++){
+        diagonal_Degree_Matrix[i] = (double*)calloc(len, sizeof(double));
+    }
+    for (int i =0; i < len; i++){
+        double sum = 0;
+        for (int j =0; j < len; j++){
+            sum += w[i][j];
+        }
+
+        diagonal_Degree_Matrix[i][i] = sum;
+    }
+    return diagonal_Degree_Matrix;
+}
+
+double **gl(double **dataPoints, int len){
+    int i, j;
+    double **w, **dd_Matrix, **gl_Matrix;
+    gl_Matrix = (double**)malloc(len * sizeof(double*));
+    for (i = 0; i < len; i++){
+        gl_Matrix[i] = (double*)malloc(len * sizeof(double));
+    }
+    w = wam(dataPoints, len);
+    dd_Matrix = ddg(dataPoints, len);
+    for (i = 0; i < len; i++){
+        for (j = 0; j < len; j++){
+            gl_Matrix[i][j] = dd_Matrix[i][j] - w[i][j];
+        }
+    }
+    return gl_Matrix;
 }
 
 void free_arr(double **arr, int len){ //frees 2d array 
