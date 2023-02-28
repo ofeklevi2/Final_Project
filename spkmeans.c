@@ -96,5 +96,27 @@ double **gl(double **dataPoints, int len){
 }
 
 int main(){
+    int i, j;
+    double **w, **dd_Matrix, **gl_Matrix;
+    double **dataPoint = malloc(3 * sizeof(double*));
+    double *x1 = malloc(3 * sizeof(double));
+    double *x2 = malloc(3 * sizeof(double));
+    double *x3 = malloc(3 * sizeof(double));
+    x1[0] = 1.0, x1[1] = 2.0, x1[2] = 3.0;
+    x2[0] = 1.1, x2[1] = 2.1, x2[2] = 3.1;
+    x3[0] = 1.2, x3[1] = 2.2, x3[2] = 3.2;
+
+    dataPoint[0] = x1,   dataPoint[1] = x2,   dataPoint[2] = x3;
+    w = wam(dataPoint,3);
+    dd_Matrix = ddg(dataPoint, 3);
+    gl_Matrix = gl(dataPoint, 3);
+    print_2D_Array(w, 3);
+    printf("\n");
+    print_2D_Array(dd_Matrix, 3);
+    printf("\n");
+    print_2D_Array(gl_Matrix, 3);
+    free_arr(w, 3);
+    free_arr(dd_Matrix, 3);
+    free_arr(gl_Matrix, 3);
     return 0;
 }
