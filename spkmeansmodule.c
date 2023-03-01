@@ -51,8 +51,38 @@ static PyObject* wam(PyObject *self, PyObject *args){
     }
     data_arr = py_to_c_arr(data_list,len,len);
     res_as_arr = wam_c(data_arr,len);
-    free_arr(data_arr,len);
     res_as_list = c_to_py_list(res_as_arr, len, len);
+    free_arr(data_arr,len);
+    free_arr(res_as_arr,len);
+    return res_as_list;
+}
+
+static PyObject* ddg(PyObject *self, PyObject *args){
+    int len;
+    double **data_arr,**res_as_arr;
+    PyObject *data_list, *res_as_list;
+    if(!PyArg_ParseTuple(args, "Oi", &data_list,&len)) {
+        return NULL; 
+    }
+    data_arr = py_to_c_arr(data_list,len,len);
+    res_as_arr = ddg_c(data_arr,len);
+    res_as_list = c_to_py_list(res_as_arr, len, len);
+    free_arr(data_arr,len);
+    free_arr(res_as_arr,len);
+    return res_as_list;
+}
+
+static PyObject* gl(PyObject *self, PyObject *args){
+    int len;
+    double **data_arr,**res_as_arr;
+    PyObject *data_list, *res_as_list;
+    if(!PyArg_ParseTuple(args, "Oi", &data_list,&len)) {
+        return NULL; 
+    }
+    data_arr = py_to_c_arr(data_list,len,len);
+    res_as_arr = gl_c(data_arr,len);
+    res_as_list = c_to_py_list(res_as_arr, len, len);
+    free_arr(data_arr,len);
     free_arr(res_as_arr,len);
     return res_as_list;
 }
@@ -63,6 +93,14 @@ static PyMethodDef spkmeansMethods[] = {
         (PyCFunction) wam, 
       METH_VARARGS, 
       PyDoc_STR("wam doc")},
+    {"ddg",  
+        (PyCFunction) ddg, 
+      METH_VARARGS, 
+      PyDoc_STR("ddg doc")},
+    {"gl",  
+        (PyCFunction) gl, 
+      METH_VARARGS, 
+      PyDoc_STR("gl doc")},
     {NULL, NULL, 0, NULL}     /* The last entry must be all NULL as shown to act as a
                                  sentinel. Python looks for this entry to know that all
                                  of the functions for the module have been defined. */
