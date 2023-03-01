@@ -8,13 +8,14 @@
 
 double** py_to_c_arr(PyObject *list, int dim_1, int dim_2){//converts python list to c array 
     int i,j;
+    double** data_arr;
     PyObject *item;
     data_arr = malloc(dim_1 * sizeof(double*));
     if (data_arr == NULL){
       return NULL;
     }
-    for (i=0; i < dim_2; i++){
-      data_arr[i] = malloc(vec_len * sizeof(double));
+    for (i=0; i < dim_1; i++){
+      data_arr[i] = malloc(dim_2 * sizeof(double));
       if (data_arr[i] == NULL){
         return NULL;
     }
@@ -34,7 +35,7 @@ PyObject* c_to_py_list(double **data_arr, int dim_1, int dim_2){//converts c arr
     for(i=0; i < dim_1; i++){
         PyList_SetItem(res, i, PyList_New(dim_2));
         for (j=0; j < dim_2; j++){
-            python_float = Py_BuildValue("f",final_centroids[i][j]);
+            python_float = Py_BuildValue("f",data_arr[i][j]);
             PyList_SetItem(PyList_GetItem(res,i), j, python_float);
         }
     }
@@ -42,18 +43,20 @@ PyObject* c_to_py_list(double **data_arr, int dim_1, int dim_2){//converts c arr
 }
 
 static PyObject* wam(PyObject *self, PyObject *args){
-    int **data_arr,**res_as_arr, len;
+    int len;
+    double **data_arr,**res_as_arr;
     PyObject *data_list, *res_as_list;
     if(!PyArg_ParseTuple(args, "Oi", &data_list,&len)) {
         return NULL; 
     }
     data_arr = py_to_c_arr(data_list,len,len);
-    free_arr(data_arr,len,len);
     res_as_arr = wam_c(data_arr,len);
-    res_as_list = c_to_py_list();
-    free_arr(res_as_arr,len,len);
+    free_arr(data_arr,len);
+    res_as_list = c_to_py_list(res_as_arr, len, len);
+    free_arr(res_as_arr,len);
     return res_as_list;
 }
+
 
 static PyMethodDef spkmeansMethods[] = {
     {"wam",  

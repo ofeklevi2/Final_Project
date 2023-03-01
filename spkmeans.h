@@ -14,9 +14,9 @@ typedef struct vector
 
 double** wam_c(double **dataPoints, int len);
 
-double** ddg_c(double **dataPoints);
+double** ddg_c(double **dataPoints, int len);
 
-double** gl_c(double **dataPoints);
+double** gl_c(double **dataPoints, int len);
 
 void free_arr(double **arr, int len);
 

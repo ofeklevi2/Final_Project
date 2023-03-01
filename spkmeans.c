@@ -10,10 +10,10 @@ void print_1D_Array(double *arr, int len){
     }
 }
 
-void print_2D_Array(double **arr, int len){
+void print_2D_Array(double **arr, int dim_1, int dim_2){
     int i, j;
-    for (i = 0; i < len; i++){
-        for (j = 0; j < len; j++){
+    for (i = 0; i < dim_1; i++){
+        for (j = 0; j < dim_2; j++){
             printf("%lf ", arr[i][j]);
         }
         printf("\n");
@@ -30,7 +30,7 @@ double distance(double *xi, double *xj, int len){
     return exp(sum);
 }
 
-double **wam(double **dataPoints, int len){
+double **wam_c(double **dataPoints, int len){
     int i, j;
     double **w = (double**)malloc(len * sizeof(double*));
     for (i = 0; i < len; i++){
@@ -53,9 +53,9 @@ double **wam(double **dataPoints, int len){
 }
 
 
-double **ddg(double **dataPoints, int len){
+double **ddg_c(double **dataPoints, int len){
     int i, j;
-    double **w = wam(dataPoints, len);
+    double **w = wam_c(dataPoints, len);
     double **diagonal_Degree_Matrix = (double**)malloc(len * sizeof(double*));
     for (int i =0; i < len; i++){
         diagonal_Degree_Matrix[i] = (double*)calloc(len, sizeof(double));
@@ -71,15 +71,15 @@ double **ddg(double **dataPoints, int len){
     return diagonal_Degree_Matrix;
 }
 
-double **gl(double **dataPoints, int len){
+double **gl_c(double **dataPoints, int len){
     int i, j;
     double **w, **dd_Matrix, **gl_Matrix;
     gl_Matrix = (double**)malloc(len * sizeof(double*));
     for (i = 0; i < len; i++){
         gl_Matrix[i] = (double*)malloc(len * sizeof(double));
     }
-    w = wam(dataPoints, len);
-    dd_Matrix = ddg(dataPoints, len);
+    w = wam_c(dataPoints, len);
+    dd_Matrix = ddg_c(dataPoints, len);
     for (i = 0; i < len; i++){
         for (j = 0; j < len; j++){
             gl_Matrix[i][j] = dd_Matrix[i][j] - w[i][j];
