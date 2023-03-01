@@ -247,7 +247,7 @@ void get_A_Converence(double **A, int len){
     printf("sum1 = %lf, sum2 = %lf, Diff = %lf ", sum1, sum2, sum1 - sum2);
     printf("\n\n\n");
 
-    while (sum1 - sum2 > eps){
+    while (sum1 - sum2 > eps && sum2 > 0){ //// if Diff < eps or A' is diagonal - stop rotating
         sum1 = sum2;
         ij = find_Indexes_Of_Max_Element(A, len);
         i = ij[0], j =ij[1];
@@ -291,9 +291,9 @@ void test_1(){
     // print_2D_Array(W, len);
     // printf("\nD:\n");
     // print_2D_Array(D, len);
-    // printf("\nL:\n");
-    // print_2D_Array(L, len);
-    // printf("\nP:\n");
+    printf("\nL:\n");
+    print_2D_Array(L, len);
+    printf("\nP:\n");
     // print_2D_Array(P, len);
     // printf("\n");
     ij = find_Indexes_Of_Max_Element(L, len);
@@ -372,12 +372,97 @@ void test_2(){
     free_arr(P, len);
 }
 
+void test_3(){
+    int i, j, len;
+    int *ij;
+    double c, s, sum1, sum2;
+    double **W, **D, **L, **P, **A_Prime;
+    double **dataPoint = malloc(3 * sizeof(double*));
+    double *x1 = malloc(3 * sizeof(double));
+    double *x2 = malloc(3 * sizeof(double));
+    double *x3 = malloc(3 * sizeof(double));
+
+    len = 3;
+    x1[0] = 1.0,       x1[1] = sqrt(2.0), x1[2] = 2.0;
+    x2[0] = sqrt(2.0), x2[1] = 3.0,       x2[2] = sqrt(2.0);
+    x3[0] = 2.0,       x3[1] = sqrt(2.0), x3[2] = 1.0;
+
+    dataPoint[0] = x1,   dataPoint[1] = x2,   dataPoint[2] = x3;
+
+    W = wam(dataPoint,len);
+    D = ddg(dataPoint, len);
+    L = gl(dataPoint, len);
+    P = build_Rotation_Matrix_P(L, len);
+
+    printf("\nP:\n");
+    print_2D_Array(P, len);
+    printf("\n");
+    get_A_Converence(dataPoint, len);
+}
+
+void test_4(){
+    int i, j, len;
+    int *ij;
+    double c, s, sum1, sum2;
+    double **W, **D, **L, **P, **A_Prime;
+    double **dataPoint = malloc(3 * sizeof(double*));
+    double *x1 = malloc(3 * sizeof(double));
+    double *x2 = malloc(3 * sizeof(double));
+    double *x3 = malloc(3 * sizeof(double));
+
+    len = 3;
+    x1[0] = 2.0, x1[1] = 1,   x1[2] = 2.0;
+    x2[0] = 1,   x2[1] = 3.0, x2[2] = 1;
+    x3[0] = 2.0, x3[1] = 1,   x3[2] = 1.0;
+
+    dataPoint[0] = x1,   dataPoint[1] = x2,   dataPoint[2] = x3;
+
+    W = wam(dataPoint,len);
+    D = ddg(dataPoint, len);
+    L = gl(dataPoint, len);
+    P = build_Rotation_Matrix_P(L, len);
+
+    printf("\nP:\n");
+    print_2D_Array(P, len);
+    printf("\n");
+    get_A_Converence(dataPoint, len);
+}
+
+void test_5(){
+    int i, j, len;
+    int *ij;
+    double c, s, sum1, sum2;
+    double **W, **D, **L, **P, **A_Prime;
+    double **dataPoint = malloc(2 * sizeof(double*));
+    double *x1 = malloc(2 * sizeof(double));
+    double *x2 = malloc(2 * sizeof(double));
+
+    len = 2;
+    x1[0] = 1, x1[1] = 1;   
+    x2[0] = 1, x2[1] = -1; 
+     
+    dataPoint[0] = x1,   dataPoint[1] = x2;
+
+    W = wam(dataPoint,len);
+    D = ddg(dataPoint, len);
+    L = gl(dataPoint, len);
+    P = build_Rotation_Matrix_P(L, len);
+
+    printf("\nP:\n");
+    print_2D_Array(P, len);
+    printf("\n");
+    get_A_Converence(dataPoint, len);
+}
+
 //##################### End_Of_Tests_Section #################################
 
 
 int main(){
-    //test_1();
-    test_2();
+    // test_1();
+    //test_2();
+    // test_3();
+    //test_4();
+    // test_5();
     return 0;
 }
 
