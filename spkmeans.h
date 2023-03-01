@@ -12,10 +12,12 @@ typedef struct vector
     struct cord *cords;
 }vector;
 
-double** wam(double **dataPoints);
+double** wam_c(double **dataPoints, int len);
 
-double** ddg(double **dataPoints);
+double** ddg_c(double **dataPoints);
 
-double** gl(double **dataPoints);
+double** gl_c(double **dataPoints);
+
+void free_arr(double **arr, int len);
 
 # endif
