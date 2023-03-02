@@ -10,10 +10,10 @@ void print_1D_Array(double *arr, int len){
     }
 }
 
-void print_2D_Array(double **arr, int len){
+void print_2D_Array(double **arr, int dim_1, int dim_2){
     int i, j;
-    for (i = 0; i < len; i++){
-        for (j = 0; j < len; j++){
+    for (i = 0; i < dim_1; i++){
+        for (j = 0; j < dim_2; j++){
             printf("%lf ", arr[i][j]);
         }
         printf("\n");
@@ -147,7 +147,7 @@ double off(double **A, int len){
 }
 
 
-double **wam(double **dataPoints, int len){
+double **wam_c(double **dataPoints, int len){
     int i, j;
     double **W = (double**)malloc(len * sizeof(double*));
     if (W == NULL){
@@ -173,9 +173,11 @@ double **wam(double **dataPoints, int len){
 }
 
 
-double **ddg(double **dataPoints, int len){
+double **ddg_c(double **dataPoints, int len){
     int i, j;
-    double **W = wam(dataPoints, len);
+    double **w = wam_c(dataPoints, len);
+    double **diagonal_Degree_Matrix = (double**)malloc(len * sizeof(double*));
+    double **W = wam_c(dataPoints, len);
     if (W == NULL){
         return NULL;
     }
@@ -183,6 +185,7 @@ double **ddg(double **dataPoints, int len){
     if (D == NULL){
         return NULL;
     }
+
     for (int i =0; i < len; i++){
         D[i] = (double*)calloc(len, sizeof(double));
     }
@@ -197,7 +200,7 @@ double **ddg(double **dataPoints, int len){
     return D;
 }
 
-double **gl(double **dataPoints, int len){
+double **gl_c(double **dataPoints, int len){
     int i, j;
     double **W, **D, **L;
     L = (double**)malloc(len * sizeof(double*));
@@ -207,14 +210,17 @@ double **gl(double **dataPoints, int len){
     for (i = 0; i < len; i++){
         L[i] = (double*)malloc(len * sizeof(double));
     }
-    W = wam(dataPoints, len);
+    W = wam_c(dataPoints, len);
     if (W == NULL){
         return NULL;
     }
-    D = ddg(dataPoints, len);
+    D = ddg_c(dataPoints, len);
     if (W == NULL){
         return NULL;
     }
+
+    w = wam_c(dataPoints, len);
+    dd_Matrix = ddg_c(dataPoints, len);
     for (i = 0; i < len; i++){
         for (j = 0; j < len; j++){
            L[i][j] = D[i][j] - W[i][j];

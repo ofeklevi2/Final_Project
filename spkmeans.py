@@ -7,22 +7,37 @@ np.random.seed(0)
 def eigengapHuristic():
     pass
 
+def format_print(centroids):
+    for centroid in centroids:
+        c = ""
+        for cord in range(len(centroid)-1):
+            x = "%.4f"%centroid[cord]
+            c += x +','
+        c += "%.4f"%centroid[cord+1]
+        print(c)
 
 def main():
-    args =sys.argv[1:]
-    goalValues = ["spk", "wam", "ddg", "gl", "jacobi"]
-    length = len(args)
-    if (length < 2 or length > 3 ):
-        return False
-    elif (length == 2):
-        k = eigengapHuristic()
-        goal = args[0]
-        file_name = args[1]
-    else:
-        k = args[0]
+    print("main")
+    args = sys.argv[1:]
+    if (len(args) == 3):
+        K = args[0]
         goal = args[1]
-        file_name = args[2]
-    
+        input_data = args[2]
+    else:
+        K = eigengapHuristic()
+        goal = args[0]
+        input_data = args[1]
+        
+    dataPoints = np.loadtxt(input_data,delimiter=",",dtype=float)
+    dataPoints = dataPoints.tolist()
+    if (goal == "wam"):
+        res = mykmeanssp.wam(dataPoints, len(dataPoints))
+    elif (goal == "ddg"):
+        res = mykmeanssp.ddg(dataPoints, len(dataPoints))
+    elif (goal == "gl"):
+        res = mykmeanssp.gl(dataPoints, len(dataPoints))
+    format_print(res)
 
 
-    N = getNumberOfDataPoints()
+if __name__ == '__main__':
+    main()
