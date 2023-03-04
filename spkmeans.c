@@ -87,7 +87,7 @@ int vector_len(vector *vec){
         curr_cord = curr_cord->next;
     }
     return cnt;
-
+}
 void free_arr(double **arr, int len){ //frees 2d array 
     int i;
     for (i=0; i<len; i++){
@@ -287,8 +287,8 @@ double **gl_c(double **dataPoints, int len){
         return NULL;
     }
 
-    w = wam_c(dataPoints, len);
-    dd_Matrix = ddg_c(dataPoints, len);
+    W = wam_c(dataPoints, len);
+    D = ddg_c(dataPoints, len);
     for (i = 0; i < len; i++){
         for (j = 0; j < len; j++){
            L[i][j] = D[i][j] - W[i][j];
@@ -311,12 +311,12 @@ void get_A_Converence(double **A, int len){
     s = calc_s(i, j, A);
     sum1 = off(A, len);
     printf("A:\n");
-    print_2D_Array(A, len);
+    print_2D_Array(A, len,len);
     printf("\n");
     get_A_Prime(i, j, A, len, c, s);
     sum2 = off(A, len);
     printf("A':\n");
-    print_2D_Array(A, len);
+    print_2D_Array(A, len,len);
     printf("\n");
     printf("sum1 = %lf, sum2 = %lf, Diff = %lf ", sum1, sum2, sum1 - sum2);
     printf("\n\n\n");
@@ -330,7 +330,7 @@ void get_A_Converence(double **A, int len){
         get_A_Prime(i, j, A, len, c, s);
         sum2 = off(A, len);
         printf("A':\n");
-        print_2D_Array(A, len);
+        print_2D_Array(A, len,len);
         printf("\n");
         printf("sum1 = %lf, sum2 = %lf, Diff = %lf ", sum1, sum2, sum1 - sum2);
         printf("\n\n\n");
