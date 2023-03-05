@@ -1,7 +1,38 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <math.h>
+# include <string.h>
 #include "spkmeans.h"
+
+void delete_cords(struct cord *head){
+  if (head != NULL){
+    delete_cords(head->next);
+    free(head);
+  }
+}
+
+void delete_vectors(struct vector *head){
+  if (head != NULL){
+    delete_cords(head->cords);
+    delete_vectors(head->next);
+    free(head);
+  }
+}
+
+double **allocate_Memory(int rows, int cols){
+    int i;
+    double **A = (double**)malloc(rows * sizeof(double*));
+    if (A == NULL){
+        return NULL;
+    }
+    for (i = 0; i < cols; i++){
+        A[i] = (double*)calloc(cols, sizeof(double));
+        if (A[i] == NULL){
+        return NULL;
+        }
+    }
+    return A;
+}
 
 void print_1D_Array(double *arr, int len){
     int i;
@@ -20,6 +51,58 @@ void print_2D_Array(double **arr, int dim_1, int dim_2){
     }
 }
 
+double *vector_to_arr(vector *head, int dim){
+    double *res;
+    cord *curr_cord;
+    int i;
+    curr_cord = head->cords;
+    res = malloc(dim * sizeof(double));
+    if (res == NULL){
+        return NULL;
+    }
+    for (i=0; i<dim; i++){
+        res[i] = curr_cord->value;
+        curr_cord = curr_cord->next;
+    }
+    return res;
+}
+
+double **linked_list_to_arr(vector *head, int dim_1, int dim_2){
+    double **res;
+    vector *curr_vec; 
+    int i;
+    curr_vec = head;
+    res = malloc(dim_1*sizeof(double*));
+    if (res == NULL){
+        return NULL;
+    }
+    for (i=0; i<dim_1; i++){
+        res[i] = vector_to_arr(curr_vec,dim_2);
+        curr_vec = curr_vec->next;
+    }
+    return res;
+}
+
+
+int linked_list_len(struct vector *head_vec){
+    int cnt;
+    cnt = 0;
+    for(; head_vec->next != NULL; head_vec = head_vec->next){
+      ++cnt;
+  }
+  return cnt;
+}
+
+int vector_len(vector *vec){
+    cord *curr_cord;
+    int cnt = 0;
+    curr_cord = vec->cords;
+    while(curr_cord != NULL){
+        cnt++;
+        curr_cord = curr_cord->next;
+    }
+    return cnt;
+}
 void free_arr(double **arr, int len){ //frees 2d array 
     int i;
     for (i=0; i<len; i++){
@@ -48,7 +131,7 @@ int *find_Indexes_Of_Max_Element(double **L, int len){
     ij[0] = 0, ij[1] = 1;
     for (i = 0; i < len; i++){
         for (j = i + 1; j < len; j++){
-            if (fabs(L[i][j]) > maximum){
+            if (fabs(L[i][j]) > fabs(maximum)){
                 maximum = L[i][j];
                 ij[0] = i;
                 ij[1] = j;
@@ -95,6 +178,9 @@ double **build_Rotation_Matrix_P(double **A, int len){
     j = ij[1];
         for (k = 0; k < len; k++){
         P[k] = (double*)calloc(len, sizeof(double*));
+        if (P[k] == NULL){
+            return NULL;
+        }
         if (k == i){
             P[i][i] = calc_c(i, j, A);
             P[i][j] = calc_s(i, j, A);
@@ -125,7 +211,7 @@ void get_A_Prime(int i, int j, double **A, int len, double c, double s){
         }
     }
     ii = (c * c) * A[i][i] + (s * s) * A[j][j] - 2 * s * c * A[i][j]; 
-    jj = (c * c) * A[i][i] + (s * s) * A[j][j] + 2 * s * c * A[i][j]; 
+    jj = (s * s) * A[i][i] + (c * c) * A[j][j] + 2 * s * c * A[i][j]; 
     ij = 0;
 
     A[i][i] = ii;
@@ -146,6 +232,34 @@ double off(double **A, int len){
     return sum;
 }
 
+double **matrix_Multiplication(double **A, double **B, int len){
+    int i, j, k;
+    double **res = allocate_Memory(len, len);
+    if (res == NULL){
+        return NULL;
+    }
+    for (i = 0; i < len; i++){
+        for (j = 0; j < len; j++){
+            for (k = 0; k < len; k++){
+                res[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    return res;
+}
+
+double **I(int len){
+    int i;
+    double **res = allocate_Memory(len, len);
+    if (res == NULL){
+        return NULL;
+    }
+    for (i = 0; i < len; i++){
+        res[i][i] = 1;
+    }
+    return res;
+}
+
 
 double **wam_c(double **dataPoints, int len){
     int i, j;
@@ -155,6 +269,9 @@ double **wam_c(double **dataPoints, int len){
     }
     for (i = 0; i < len; i++){
        W[i] = (double*)malloc(len * sizeof(double*));
+        if (W[i] == NULL){
+            return NULL;
+        }   
     }
 
     for (i = 0; i < len; i++){
@@ -209,6 +326,9 @@ double **gl_c(double **dataPoints, int len){
     }
     for (i = 0; i < len; i++){
         L[i] = (double*)malloc(len * sizeof(double));
+        if (L[i] == NULL){
+            return NULL;
+        }    
     }
     W = wam_c(dataPoints, len);
     if (W == NULL){
@@ -231,13 +351,27 @@ double **gl_c(double **dataPoints, int len){
     return L;
 }
 
-void get_A_Converence(double **A, int len){
+double **get_A_Converence(double **A, int len){
     int i, j;
     double c, s, sum1, sum2;
     int *ij;
+    double **V = I(len);
+    if (V == NULL){
+        return NULL;
+    }
     double eps = 1.0 * pow(10, -5);
-
+    double **P = build_Rotation_Matrix_P(A, len);
+    if (P == NULL){
+        return NULL;
+    } 
+    V = matrix_Multiplication(V, P, len);
+    if (V == NULL){
+        return NULL;
+    }   
     ij = find_Indexes_Of_Max_Element(A, len);
+    if (ij == NULL){
+        return NULL;
+    }  
     i = ij[0], j =ij[1];
     c = calc_c(i, j, A);
     s = calc_s(i, j, A);
@@ -245,33 +379,108 @@ void get_A_Converence(double **A, int len){
     printf("A:\n");
     print_2D_Array(A, len, len);
     printf("\n");
+    printf("P:\n");
+    print_2D_Array(P, len, len);
+    printf("\n");
     get_A_Prime(i, j, A, len, c, s);
+    free_arr(P, len);
+    P = build_Rotation_Matrix_P(A, len);
+    V = matrix_Multiplication(V, P, len);
+    if (P == NULL){
+        return NULL;
+    } 
     sum2 = off(A, len);
     printf("A':\n");
     print_2D_Array(A, len, len);
     printf("\n");
     printf("sum1 = %lf, sum2 = %lf, Diff = %lf ", sum1, sum2, sum1 - sum2);
     printf("\n\n\n");
+    free_arr(P, len);
+    free(ij);
 
     while (sum1 - sum2 > eps){
         sum1 = sum2;
         ij = find_Indexes_Of_Max_Element(A, len);
+        if (ij == NULL){
+            return NULL;
+        } 
         i = ij[0], j =ij[1];
         c = calc_c(i, j, A);
-        s = calc_s(i, j, A);
+        s = calc_s(i, j, A);       
         get_A_Prime(i, j, A, len, c, s);
+        P = build_Rotation_Matrix_P(A, len);
+        V = matrix_Multiplication(V, P, len);
         sum2 = off(A, len);
         printf("A':\n");
         print_2D_Array(A, len, len);
         printf("\n");
         printf("sum1 = %lf, sum2 = %lf, Diff = %lf ", sum1, sum2, sum1 - sum2);
         printf("\n\n\n");
+        free_arr(P, len);
+        free(ij);
     }
+    printf("V:\n");
+    print_2D_Array(V, len, len);
+    printf("\n");
+    free_arr(V, len);
+    return A;
 }
 
-//##################### Tests_Section #################################
-
+//################ Testers #########################
 void test_1(){
+    int i, j, len;
+    int *ij;
+    double c, s, sum1, sum2;
+    double **W, **D, **L, **P, **A_Prime;
+    double **dataPoint = malloc(3 * sizeof(double*));
+    double *x1 = malloc(3 * sizeof(double));
+    double *x2 = malloc(3 * sizeof(double));
+    double *x3 = malloc(3 * sizeof(double));
+
+    len = 3;
+    x1[0] = 1.0,       x1[1] = sqrt(2.0), x1[2] = 2.0;
+    x2[0] = sqrt(2.0), x2[1] = 3.0,       x2[2] = sqrt(2.0);
+    x3[0] = 2.0,       x3[1] = sqrt(2.0), x3[2] = 1.0;
+
+    dataPoint[0] = x1,   dataPoint[1] = x2,   dataPoint[2] = x3;
+
+    W = wam_c(dataPoint,len);
+    D = ddg_c(dataPoint, len);
+    L = gl_c(dataPoint, len);
+    P = build_Rotation_Matrix_P(L, len);
+
+    printf("W:\n");
+    print_2D_Array(W, len, len);
+    printf("\nD:\n");
+    print_2D_Array(D, len, len);
+    printf("\nL:\n");
+    print_2D_Array(L, len, len);
+    printf("\nP:\n");
+    // print_2D_Array(P, len, len);
+    // printf("\n");
+    ij = find_Indexes_Of_Max_Element(L, len);
+    i = ij[0], j =ij[1];
+    c = calc_c(i, j, L);
+    s = calc_s(i, j, L);
+    // sum1 = off(L, len);
+    // get_A_Prime(i, j, L, len, c, s);
+    // print_2D_Array(L, 3);
+    // printf("\n");
+    // sum2 = off(L, len);
+    // printf("sum1 = %lf, sum2 = %lf, eps = %lf ", sum1, sum2, sum1 - sum2);
+    // printf("\n");
+
+    get_A_Converence(L, len);
+    // print_2D_Array(L, len);
+
+    free(ij);
+    free_arr(W, len);
+    free_arr(D, len);
+    free_arr(L, len);
+    free_arr(P, len);
+}
+
+void test_2(){
     int i, j, len;
     int *ij;
     double c, s, sum1, sum2;
@@ -293,67 +502,13 @@ void test_1(){
     L = gl_c(dataPoint, len);
     P = build_Rotation_Matrix_P(L, len);
 
-    printf("W:\n");
-    print_2D_Array(W, len, len);
-    printf("\nD:\n");
-    print_2D_Array(D, len, len);
-    printf("\nL:\n");
-    print_2D_Array(L, len, len);
-    printf("\nP:\n");
-    print_2D_Array(P, len, len);
-    printf("\n");
-    ij = find_Indexes_Of_Max_Element(L, len);
-    i = ij[0], j =ij[1];
-    c = calc_c(i, j, L);
-    s = calc_s(i, j, L);
-    // sum1 = off(L, len);
-    // get_A_Prime(i, j, L, len, c, s);
-    // print_2D_Array(L, 3);
-    // printf("\n");
-    // sum2 = off(L, len);
-    // printf("sum1 = %lf, sum2 = %lf, eps = %lf ", sum1, sum2, sum1 - sum2);
-    // printf("\n");
-
-    // get_A_Converence(L, len);
-    // print_2D_Array(L, len);
-
-    free(ij);
-    free_arr(W, len);
-    free_arr(D, len);
-    free_arr(L, len);
-    free_arr(P, len);
-}
-
-void test_2(){
-    int i, j, len;
-    int *ij;
-    double c, s, sum1, sum2;
-    double **W, **D, **L, **P, **A_Prime;
-    double **dataPoint = malloc(4 * sizeof(double*));
-    double *x1 = malloc(4 * sizeof(double));
-    double *x2 = malloc(4 * sizeof(double));
-    double *x3 = malloc(4 * sizeof(double));
-    double *x4 = malloc(4 * sizeof(double));
-    len = 4;
-    x1[0] = 1.0,  x1[1] = 2.0, x1[2] = 3.0,  x1[3] = 4.0;
-    x2[0] = 1.1, x2[1] = 2.1,  x2[2] = 3.1, x2[3] = 4.1;
-    x3[0] = 1.2,  x3[1] = 2.2, x3[2] = 3.2,  x3[3] = 10.3;
-    x4[0] = 1.3, x4[1] = 2.3,  x4[2] = 3.3, x4[3] = 4.3;
-
-    dataPoint[0] = x1,   dataPoint[1] = x2,   dataPoint[2] = x3, dataPoint[3] = x4;
-
-    W = wam_c(dataPoint,len);
-    D = ddg_c(dataPoint, len);
-    L = gl_c(dataPoint, len);
-    P = build_Rotation_Matrix_P(L, len);
-
     // printf("W:\n");
     // print_2D_Array(W, len);
     // printf("\nD:\n");
     // print_2D_Array(D, len);
-    // printf("\nL:\n");
-    // print_2D_Array(L, len);
-    // printf("\nP:\n");
+    printf("\nL:\n");
+    print_2D_Array(L, len, len);
+    printf("\nP:\n");
     // print_2D_Array(P, len);
     // printf("\n");
     ij = find_Indexes_Of_Max_Element(L, len);
@@ -378,12 +533,102 @@ void test_2(){
     free_arr(P, len);
 }
 
-//##################### End_Of_Tests_Section #################################
+// ############### End of testers ##################
 
 
-int main(){
-    test_1();
-    // test_2();
+int main(int argc, char** argv){
+    test_2();
     return 0;
+
+    struct vector *head_vec, *curr_vec;
+    struct cord *head_cord, *curr_cord;
+    double n, **res;
+    char c, *goal;
+    int dim1,dim2;
+    if (argc != 3){
+        printf("An Error Has Occurred");
+        return NULL;
+    }
+    goal = argv[1];
+
+
+    head_cord = calloc(1, sizeof(struct cord));
+    if (head_cord == NULL){
+        printf("An Error Has Occurred\n");
+        return NULL; 
+    }
+    
+    curr_cord = head_cord;
+    curr_cord->next = NULL;
+
+    head_vec = calloc(1, sizeof(struct vector));
+    if (head_vec == NULL){  
+        printf("An Error Has Occurred\n");
+        return NULL; 
+    }
+    curr_vec = head_vec;
+    curr_vec->next = NULL;
+
+    FILE *input_data = fopen(argv[2], "r");
+    if (input_data == NULL){
+        printf("An Error Has Occurred\n");
+        return NULL;
+    }
+    while (fscanf(input_data,"%lf%c", &n, &c) == 2)
+        {
+
+            if (c == '\n')
+            {
+                curr_cord->value = n;
+                curr_vec->cords = head_cord;
+                curr_vec->next = calloc(1, sizeof(struct vector));
+                if (curr_vec->next == NULL){
+                printf("An Error Has Occurred\n");
+                return NULL; 
+                }
+                curr_vec = curr_vec->next;
+                curr_vec->next = NULL;
+                head_cord = malloc(sizeof(struct cord));
+                if (head_cord == NULL){
+                printf("An Error Has Occurred\n");
+                return NULL; 
+                }
+                curr_cord = head_cord;
+                curr_cord->next = NULL;
+                continue;
+            }
+
+            curr_cord->value = n;
+            curr_cord->next = calloc(1, sizeof(struct cord));
+            if (curr_cord->next == NULL){
+            printf("An Error Has Occurred\n");
+            return NULL; 
+            }
+            curr_cord = curr_cord->next;
+            curr_cord->next = NULL;
+    }
+    dim1 = linked_list_len(head_vec);
+    dim2 = vector_len(head_vec);
+    double** dataPoints = linked_list_to_arr(head_vec, dim1,dim2);
+    if (strcmp(goal, "wam") == 0){
+        res = wam_c(dataPoints,dim1);
+    }
+    else if (strcmp(goal, "ddg") == 0){
+        res = ddg_c(dataPoints,dim1);
+    }
+    else if(strcmp(goal, "gl") == 0){
+        res = gl_c(dataPoints,dim1);
+    }
+    //     else if(strcmp(goal, "jacobi") == 0){
+    //     res = jacobi_c(dataPoints,dim1);
+    // }
+    else if(strcmp(goal, "conv") == 0){
+        res = get_A_Converence(dataPoints,dim1);
+    }
+    print_2D_Array(res,dim1,dim2);
+    delete_vectors(head_vec);
+
+   return 0;
 }
+
 
