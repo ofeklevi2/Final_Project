@@ -20,4 +20,10 @@ double** gl_c(double **dataPoints, int len);
 
 void free_arr(double **arr, int len);
 
+int linked_list_len(struct vector *head_vec);
+
+void delete_cords(struct cord *head);
+
+void delete_vectors(struct vector *head);
+
 # endif
