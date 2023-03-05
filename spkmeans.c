@@ -219,8 +219,8 @@ double **gl_c(double **dataPoints, int len){
         return NULL;
     }
 
-    w = wam_c(dataPoints, len);
-    dd_Matrix = ddg_c(dataPoints, len);
+    W = wam_c(dataPoints, len);
+    D = ddg_c(dataPoints, len);
     for (i = 0; i < len; i++){
         for (j = 0; j < len; j++){
            L[i][j] = D[i][j] - W[i][j];
@@ -243,12 +243,12 @@ void get_A_Converence(double **A, int len){
     s = calc_s(i, j, A);
     sum1 = off(A, len);
     printf("A:\n");
-    print_2D_Array(A, len);
+    print_2D_Array(A, len, len);
     printf("\n");
     get_A_Prime(i, j, A, len, c, s);
     sum2 = off(A, len);
     printf("A':\n");
-    print_2D_Array(A, len);
+    print_2D_Array(A, len, len);
     printf("\n");
     printf("sum1 = %lf, sum2 = %lf, Diff = %lf ", sum1, sum2, sum1 - sum2);
     printf("\n\n\n");
@@ -262,7 +262,7 @@ void get_A_Converence(double **A, int len){
         get_A_Prime(i, j, A, len, c, s);
         sum2 = off(A, len);
         printf("A':\n");
-        print_2D_Array(A, len);
+        print_2D_Array(A, len, len);
         printf("\n");
         printf("sum1 = %lf, sum2 = %lf, Diff = %lf ", sum1, sum2, sum1 - sum2);
         printf("\n\n\n");
@@ -288,20 +288,20 @@ void test_1(){
 
     dataPoint[0] = x1,   dataPoint[1] = x2,   dataPoint[2] = x3;
 
-    W = wam(dataPoint,len);
-    D = ddg(dataPoint, len);
-    L = gl(dataPoint, len);
+    W = wam_c(dataPoint,len);
+    D = ddg_c(dataPoint, len);
+    L = gl_c(dataPoint, len);
     P = build_Rotation_Matrix_P(L, len);
 
-    // printf("W:\n");
-    // print_2D_Array(W, len);
-    // printf("\nD:\n");
-    // print_2D_Array(D, len);
-    // printf("\nL:\n");
-    // print_2D_Array(L, len);
-    // printf("\nP:\n");
-    // print_2D_Array(P, len);
-    // printf("\n");
+    printf("W:\n");
+    print_2D_Array(W, len, len);
+    printf("\nD:\n");
+    print_2D_Array(D, len, len);
+    printf("\nL:\n");
+    print_2D_Array(L, len, len);
+    printf("\nP:\n");
+    print_2D_Array(P, len, len);
+    printf("\n");
     ij = find_Indexes_Of_Max_Element(L, len);
     i = ij[0], j =ij[1];
     c = calc_c(i, j, L);
@@ -314,7 +314,7 @@ void test_1(){
     // printf("sum1 = %lf, sum2 = %lf, eps = %lf ", sum1, sum2, sum1 - sum2);
     // printf("\n");
 
-    get_A_Converence(L, len);
+    // get_A_Converence(L, len);
     // print_2D_Array(L, len);
 
     free(ij);
@@ -342,9 +342,9 @@ void test_2(){
 
     dataPoint[0] = x1,   dataPoint[1] = x2,   dataPoint[2] = x3, dataPoint[3] = x4;
 
-    W = wam(dataPoint,len);
-    D = ddg(dataPoint, len);
-    L = gl(dataPoint, len);
+    W = wam_c(dataPoint,len);
+    D = ddg_c(dataPoint, len);
+    L = gl_c(dataPoint, len);
     P = build_Rotation_Matrix_P(L, len);
 
     // printf("W:\n");
@@ -382,8 +382,8 @@ void test_2(){
 
 
 int main(){
-    //test_1();
-    test_2();
+    test_1();
+    // test_2();
     return 0;
 }
 
