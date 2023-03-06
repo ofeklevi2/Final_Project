@@ -433,8 +433,8 @@ double **jacobi_c(double **A, int len){
     for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
         J[i] = V[i - 1];
     }
-    // free_arr(A, len);
-    // free_arr(V, len);
+    free_arr(A, len);
+    free_arr(V, len);
     printf("J:\n");
     print_2D_Array(J, len + 1, len);
     printf("\n");
