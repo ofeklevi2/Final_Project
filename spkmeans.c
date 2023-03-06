@@ -103,9 +103,9 @@ int vector_len(vector *vec){
     }
     return cnt;
 }
-void free_arr(double **arr, int len){ //frees 2d array 
+void free_arr(double **arr, int rows){ //frees 2d array 
     int i;
-    for (i=0; i<len; i++){
+    for (i=0; i< rows; i++){
         free(arr[i]);
     }
     free(arr);
@@ -347,11 +347,30 @@ double **gl_c(double **dataPoints, int len){
     return L;
 }
 
+double **transpose(double **J, int len){ //len is the number of columns - the number of rows is len + 1 because the first row is of eigenvalues;
+    int i, j;
+    double **J_Transpose = allocate_Memory(len, len + 1);
+    if (J_Transpose == NULL){
+        return NULL;
+    }
+    for (i = 0; i < len; i++){
+        for (j = 0; j < len + 1; j++){
+            J_Transpose[i][j] = J[j][i];
+        }
+    }
+    return J_Transpose;
+}
+
+double **sort_Rows(double **A, int len){ // sort matrix by increasing order by its first entry of each row
+
+}
+
 double **jacobi_c(double **A, int len){
     int i, j;
     double c, s, sum1, sum2;
     int *ij;
     double **J = allocate_Memory(len + 1, len); // J for jacobi
+    double **J_Transpose; 
     if (J == NULL){
         return NULL;
     }
@@ -376,12 +395,12 @@ double **jacobi_c(double **A, int len){
     c = calc_c(i, j, A);
     s = calc_s(i, j, A);
     sum1 = off(A, len);
-    printf("A:\n");
-    print_2D_Array(A, len, len);
-    printf("\n");
-    printf("P:\n");
-    print_2D_Array(P, len, len);
-    printf("\n");
+    // printf("A:\n");
+    // print_2D_Array(A, len, len);
+    // printf("\n");
+    // printf("P:\n");
+    // print_2D_Array(P, len, len);
+    // printf("\n");
     get_A_Prime(i, j, A, len, c, s);
     free_arr(P, len);
     P = build_Rotation_Matrix_P(A, len);
@@ -390,11 +409,11 @@ double **jacobi_c(double **A, int len){
         return NULL;
     } 
     sum2 = off(A, len);
-    printf("A':\n");
-    print_2D_Array(A, len, len);
-    printf("\n");
-    printf("sum1 = %lf, sum2 = %lf, Diff = %lf ", sum1, sum2, sum1 - sum2);
-    printf("\n\n\n");
+    // printf("A':\n");
+    // print_2D_Array(A, len, len);
+    // printf("\n");
+    // printf("sum1 = %lf, sum2 = %lf, Diff = %lf ", sum1, sum2, sum1 - sum2);
+    // printf("\n\n\n");
     free_arr(P, len);
     free(ij);
 
@@ -411,17 +430,17 @@ double **jacobi_c(double **A, int len){
         P = build_Rotation_Matrix_P(A, len);
         V = matrix_Multiplication(V, P, len);
         sum2 = off(A, len);
-        printf("A':\n");
-        print_2D_Array(A, len, len);
-        printf("\n");
-        printf("sum1 = %lf, sum2 = %lf, Diff = %lf ", sum1, sum2, sum1 - sum2);
-        printf("\n\n\n");
+        // printf("A':\n");
+        // print_2D_Array(A, len, len);
+        // printf("\n");
+        // printf("sum1 = %lf, sum2 = %lf, Diff = %lf ", sum1, sum2, sum1 - sum2);
+        // printf("\n\n\n");
         free_arr(P, len);
         free(ij);
     }
-    printf("V:\n");
-    print_2D_Array(V, len, len);
-    printf("\n");
+    // printf("V:\n");
+    // print_2D_Array(V, len, len);
+    // printf("\n");
 
     for(j = 0; j < len; j++){ //first row of J contains eigenvalues
         J[0][j] = A[j][j];
@@ -429,13 +448,21 @@ double **jacobi_c(double **A, int len){
     for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
         J[i] = V[i - 1];
     }
-    free_arr(A, len);
-    free_arr(V, len);
+    // free_arr(A, len);
+    // free_arr(V, len);
     printf("J:\n");
     print_2D_Array(J, len + 1, len);
     printf("\n");
+    J_Transpose = transpose(J, len);
+    if (J_Transpose == NULL){
+        return NULL;
+    } 
+    // printf("J_Transpose:\n");
+    // print_2D_Array(J_Transpose, len, len + 1);
+    // printf("\n");   
     return J;
 }
+
 
 //################ Testers #########################
 void test_1(){
@@ -517,9 +544,9 @@ void test_2(){
     // print_2D_Array(W, len);
     // printf("\nD:\n");
     // print_2D_Array(D, len);
-    printf("\nL:\n");
-    print_2D_Array(L, len, len);
-    printf("\nP:\n");
+    // printf("\nL:\n");
+    // print_2D_Array(L, len, len);
+    // printf("\nP:\n");
     // print_2D_Array(P, len);
     // printf("\n");
     ij = find_Indexes_Of_Max_Element(L, len);
