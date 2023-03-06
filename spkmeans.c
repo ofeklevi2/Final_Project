@@ -351,10 +351,14 @@ double **gl_c(double **dataPoints, int len){
     return L;
 }
 
-double **get_A_Converence(double **A, int len){
+double **jacobi_c(double **A, int len){
     int i, j;
     double c, s, sum1, sum2;
     int *ij;
+    double **J = allocate_Memory(len + 1, len); // J for jacobi
+    if (J == NULL){
+        return NULL;
+    }
     double **V = I(len);
     if (V == NULL){
         return NULL;
@@ -422,8 +426,19 @@ double **get_A_Converence(double **A, int len){
     printf("V:\n");
     print_2D_Array(V, len, len);
     printf("\n");
-    free_arr(V, len);
-    return A;
+
+    for(j = 0; j < len; j++){ //first row of J contains eigenvalues
+        J[0][j] = A[j][j];
+    }
+    for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
+        J[i] = V[i - 1];
+    }
+    // free_arr(A, len);
+    // free_arr(V, len);
+    printf("J:\n");
+    print_2D_Array(J, len + 1, len);
+    printf("\n");
+    return J;
 }
 
 //################ Testers #########################
@@ -470,7 +485,7 @@ void test_1(){
     // printf("sum1 = %lf, sum2 = %lf, eps = %lf ", sum1, sum2, sum1 - sum2);
     // printf("\n");
 
-    get_A_Converence(L, len);
+    jacobi_c(L, len);
     // print_2D_Array(L, len);
 
     free(ij);
@@ -523,7 +538,7 @@ void test_2(){
     // printf("sum1 = %lf, sum2 = %lf, eps = %lf ", sum1, sum2, sum1 - sum2);
     // printf("\n");
 
-    get_A_Converence(L, len);
+    jacobi_c(L, len);
     // print_2D_Array(L, len);
 
     free(ij);
@@ -619,11 +634,8 @@ int main(int argc, char** argv){
     else if(strcmp(goal, "gl") == 0){
         res = gl_c(dataPoints,dim1);
     }
-    //     else if(strcmp(goal, "jacobi") == 0){
-    //     res = jacobi_c(dataPoints,dim1);
-    // }
-    else if(strcmp(goal, "conv") == 0){
-        res = get_A_Converence(dataPoints,dim1);
+        else if(strcmp(goal, "jacobi") == 0){
+        res = jacobi_c(dataPoints,dim1);
     }
     print_2D_Array(res,dim1,dim2);
     delete_vectors(head_vec);
