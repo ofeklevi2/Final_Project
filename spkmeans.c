@@ -105,7 +105,7 @@ int vector_len(vector *vec){
 }
 void free_arr(double **arr, int rows){ //frees 2d array 
     int i;
-    for (i=0; i< rows; i++){
+    for (i=0; i < rows; i++){
         free(arr[i]);
     }
     free(arr);
@@ -347,22 +347,63 @@ double **gl_c(double **dataPoints, int len){
     return L;
 }
 
-double **transpose(double **J, int len){ //len is the number of columns - the number of rows is len + 1 because the first row is of eigenvalues;
+double **transpose(double **J, int rows, int cols){ //rows is the #rows of J, cols is ther #cols of J
     int i, j;
-    double **J_Transpose = allocate_Memory(len, len + 1);
+    double **J_Transpose = allocate_Memory(cols, rows);
     if (J_Transpose == NULL){
         return NULL;
     }
-    for (i = 0; i < len; i++){
-        for (j = 0; j < len + 1; j++){
+    for (i = 0; i < cols; i++){
+        for (j = 0; j < rows; j++){
             J_Transpose[i][j] = J[j][i];
         }
     }
     return J_Transpose;
 }
 
-double **sort_Rows(double **A, int len){ // sort matrix by increasing order by its first entry of each row
+int comparator (const void *x1, const void *x2){ // x1 and x2 are eigenvalue struct (rows of J_Transpose)
+    eigenvalue *a =  (eigenvalue*) x1;
+    eigenvalue *b =  (eigenvalue*) x2;
 
+    if (a->value < b->value) return -1;
+    else if (a->value > b->value) return 1;
+    else if (a->index < b->index) return -1;
+    else if (a->index > b->index) return 1;
+    else return 0;
+}
+
+double **sort_Rows(double **J_Transpose, int len){ // sort matrix by increasing order by its first entry of each row
+                                                   // len is number of rows == number of eigenvalues
+    int i, j;
+    eigenvalue *arr = (eigenvalue*)malloc(len * sizeof(eigenvalue));
+    if (arr == NULL){
+        return NULL;
+    }
+    double **res = allocate_Memory(len, len + 1);
+    if (res == NULL){
+        return NULL;
+    }
+    for (i = 0 ; i < len; i++){
+        eigenvalue a = {.index = i, .value = J_Transpose[i][0], .row = J_Transpose[i]};
+        arr[i] = a;
+    }
+    qsort(arr, len, sizeof(eigenvalue), comparator);
+    for (i = 0; i < len; i++){
+        for (j = 0; j < len + 1; j++){
+            res[i][j] = arr[i].row[j];
+        }
+    }
+
+    //free arr
+    for (i = 0; i < len; i++){
+        free(arr[i].row);
+    }
+    free(arr);
+    // free_arr(J_Transpose, len);
+    printf("sorted J_Transpose\n");
+    print_2D_Array(res, len, len + 1);
+    printf("\n");
+    return res;
 }
 
 double **jacobi_c(double **A, int len){
@@ -370,7 +411,7 @@ double **jacobi_c(double **A, int len){
     double c, s, sum1, sum2;
     int *ij;
     double **J = allocate_Memory(len + 1, len); // J for jacobi
-    double **J_Transpose; 
+    double **J_Transpose, **sorted_J_Transpose; 
     if (J == NULL){
         return NULL;
     }
@@ -453,13 +494,30 @@ double **jacobi_c(double **A, int len){
     printf("J:\n");
     print_2D_Array(J, len + 1, len);
     printf("\n");
-    J_Transpose = transpose(J, len);
+    J_Transpose = transpose(J, len + 1, len);  // (len + 1) : #rows of J, (len) - #cols of J
     if (J_Transpose == NULL){
         return NULL;
     } 
-    // printf("J_Transpose:\n");
-    // print_2D_Array(J_Transpose, len, len + 1);
-    // printf("\n");   
+    printf("J_Transpose:\n");
+    print_2D_Array(J_Transpose, len, len + 1);
+    printf("\n");  
+    sorted_J_Transpose = sort_Rows(J_Transpose, len); 
+    
+    //now transpose sorted_J_Transpose to get sorted_J
+    for (i = 0; i < len + 1; i++){
+        for(j = 0; j < len; j++){
+            J[i][j] = sorted_J_Transpose[j][i];
+        }
+    }
+
+    //###########
+    //free_arr(J_Transpose, len); // J_Transpose refuses to get deletedddddddddd
+    //############
+
+    printf("sprted_J:\n");
+    print_2D_Array(J, len + 1, len);
+    printf("\n"); 
+
     return J;
 }
 
@@ -487,13 +545,13 @@ void test_1(){
     L = gl_c(dataPoint, len);
     P = build_Rotation_Matrix_P(L, len);
 
-    printf("W:\n");
-    print_2D_Array(W, len, len);
-    printf("\nD:\n");
-    print_2D_Array(D, len, len);
-    printf("\nL:\n");
-    print_2D_Array(L, len, len);
-    printf("\nP:\n");
+    // printf("W:\n");
+    // print_2D_Array(W, len, len);
+    // printf("\nD:\n");
+    // print_2D_Array(D, len, len);
+    // printf("\nL:\n");
+    // print_2D_Array(L, len, len);
+    // printf("\nP:\n");
     // print_2D_Array(P, len, len);
     // printf("\n");
     ij = find_Indexes_Of_Max_Element(L, len);
@@ -575,8 +633,9 @@ void test_2(){
 
 
 int main(int argc, char** argv){
-    //test_2();
-    //return 0;
+    test_1();
+    return 0;
+
 
     struct vector *head_vec, *curr_vec;
     struct cord *head_cord, *curr_cord;
