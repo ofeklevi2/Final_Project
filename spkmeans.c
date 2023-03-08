@@ -436,12 +436,6 @@ double **jacobi_c(double **A, int len){
     c = calc_c(i, j, A);
     s = calc_s(i, j, A);
     sum1 = off(A, len);
-    // printf("A:\n");
-    // print_2D_Array(A, len, len);
-    // printf("\n");
-    // printf("P:\n");
-    // print_2D_Array(P, len, len);
-    // printf("\n");
     get_A_Prime(i, j, A, len, c, s);
     free_arr(P, len);
     P = build_Rotation_Matrix_P(A, len);
@@ -450,11 +444,6 @@ double **jacobi_c(double **A, int len){
         return NULL;
     } 
     sum2 = off(A, len);
-    // printf("A':\n");
-    // print_2D_Array(A, len, len);
-    // printf("\n");
-    // printf("sum1 = %lf, sum2 = %lf, Diff = %lf ", sum1, sum2, sum1 - sum2);
-    // printf("\n\n\n");
     free_arr(P, len);
     free(ij);
 
@@ -471,17 +460,9 @@ double **jacobi_c(double **A, int len){
         P = build_Rotation_Matrix_P(A, len);
         V = matrix_Multiplication(V, P, len);
         sum2 = off(A, len);
-        // printf("A':\n");
-        // print_2D_Array(A, len, len);
-        // printf("\n");
-        // printf("sum1 = %lf, sum2 = %lf, Diff = %lf ", sum1, sum2, sum1 - sum2);
-        // printf("\n\n\n");
         free_arr(P, len);
         free(ij);
     }
-    // printf("V:\n");
-    // print_2D_Array(V, len, len);
-    // printf("\n");
 
     for(j = 0; j < len; j++){ //first row of J contains eigenvalues
         J[0][j] = A[j][j];
