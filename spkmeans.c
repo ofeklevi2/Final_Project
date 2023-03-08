@@ -37,7 +37,9 @@ double **allocate_Memory(int rows, int cols){
 void print_1D_Array(double *arr, int len){
     int i;
     for (i = 0; i < len; i++){
-        printf("%lf ", arr[i]);
+        if (arr[i] == 0) printf("0.0000");
+        else printf("%.4f", arr[i]);
+        if (i != len - 1) printf(",");
     }
 }
 
@@ -45,7 +47,9 @@ void print_2D_Array(double **arr, int dim_1, int dim_2){
     int i, j;
     for (i = 0; i < dim_1; i++){
         for (j = 0; j < dim_2; j++){
-            printf("%lf ", arr[i][j]);
+            if (arr[i][j] == 0) printf("0.0000");
+            else printf("%.4f", arr[i][j]);
+            if (j != dim_2 - 1) printf(",");
         }
         printf("\n");
     }
@@ -404,14 +408,11 @@ double **sort_Rows(double **J_Transpose, int len){ // sort matrix by increasing 
     }
     free(arr);
     // free_arr(J_Transpose, len);
-    printf("sorted J_Transpose\n");
-    print_2D_Array(res, len, len + 1);
-    printf("\n");
     return res;
 }
 
 double **jacobi_c(double **A, int len){
-    int i, j;
+    int i, j, iter;
     double c, s, sum1, sum2;
     int *ij;
     double **J = allocate_Memory(len + 1, len); // J for jacobi
@@ -451,7 +452,8 @@ double **jacobi_c(double **A, int len){
     free_arr(P, len);
     free(ij);
 
-    while (sum1 - sum2 > eps){
+    iter = 1;
+    while (sum1 - sum2 > eps && iter < 100){
         sum1 = sum2;
         ij = find_Indexes_Of_Max_Element(A, len);
         if (ij == NULL){
@@ -466,7 +468,10 @@ double **jacobi_c(double **A, int len){
         sum2 = off(A, len);
         free_arr(P, len);
         free(ij);
+        iter++;
     }
+
+    
 
     for(j = 0; j < len; j++){ //first row of J contains eigenvalues
         J[0][j] = A[j][j];
@@ -476,33 +481,26 @@ double **jacobi_c(double **A, int len){
     }
     // free_arr(A, len);
     // free_arr(V, len);
-    printf("J:\n");
-    print_2D_Array(J, len + 1, len);
-    printf("\n");
-    J_Transpose = transpose(J, len + 1, len);  // (len + 1) : #rows of J, (len) - #cols of J
-    if (J_Transpose == NULL){
-        return NULL;
-    } 
-    printf("J_Transpose:\n");
-    print_2D_Array(J_Transpose, len, len + 1);
-    printf("\n");  
-    sorted_J_Transpose = sort_Rows(J_Transpose, len); 
+
+
+    //############################## Start spk() sort J code here #################################################
+    // J_Transpose = transpose(J, len + 1, len);  // (len + 1) : #rows of J, (len) - #cols of J
+    // if (J_Transpose == NULL){
+    //     return NULL;
+    // }  
+    // sorted_J_Transpose = sort_Rows(J_Transpose, len); 
     
-    //now transpose sorted_J_Transpose to get sorted_J
-    for (i = 0; i < len + 1; i++){
-        for(j = 0; j < len; j++){
-            J[i][j] = sorted_J_Transpose[j][i];
-        }
-    }
+    // //now transpose sorted_J_Transpose to get sorted_J
+    // for (i = 0; i < len + 1; i++){
+    //     for(j = 0; j < len; j++){
+    //         J[i][j] = sorted_J_Transpose[j][i];
+    //     }
+    // }
+    // //###########
+    // //free_arr(J_Transpose, len); // J_Transpose refuses to get deletedddddddddd
+    // //############
 
-    //###########
-    //free_arr(J_Transpose, len); // J_Transpose refuses to get deletedddddddddd
-    //############
-
-    printf("sprted_J:\n");
-    print_2D_Array(J, len + 1, len);
-    printf("\n"); 
-
+    //############################## End spk() sort J code here #################################################
     return J;
 }
 
@@ -618,9 +616,6 @@ void test_2(){
 
 
 int main(int argc, char** argv){
-    test_1();
-    return 0;
-
     struct vector *head_vec, *curr_vec;
     struct cord *head_cord, *curr_cord;
     double n, **res;
@@ -703,7 +698,7 @@ int main(int argc, char** argv){
         else if(strcmp(goal, "jacobi") == 0){
         res = jacobi_c(dataPoints,dim1);
     }
-    print_2D_Array(res,dim1,dim2);
+    print_2D_Array(res,dim1 + 1,dim2);
     delete_vectors(head_vec);
 
    return 0;
