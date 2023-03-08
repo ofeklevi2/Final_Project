@@ -12,6 +12,13 @@ typedef struct vector
     struct cord *cords;
 }vector;
 
+typedef struct eigenvalue{
+    double value;
+    int index;
+    double *row;
+
+}eigenvalue;
+
 double** wam_c(double **dataPoints, int len);
 
 double** ddg_c(double **dataPoints, int len);
