@@ -121,6 +121,7 @@ double distance(double *xi, double *xj, int len){
     for (i = 0; i < len; i++){
         sum += pow(xi[i] - xj[i], 2);
     }
+    printf("sum = %lf \n", sum);
     sum = - sum / 2;
     return exp(sum);
 }
@@ -154,8 +155,6 @@ double calc_t(int i, int j, double **A){
 }
 double calc_c(int i, int j, double **A){
     double t = calc_t(i, j, A);
-
-
     double c = 1 / sqrt((t * t) + 1); 
     return c;
 }
@@ -684,17 +683,20 @@ int main(int argc, char** argv){
     double** dataPoints = linked_list_to_arr(head_vec, dim1,dim2);
     if (strcmp(goal, "wam") == 0){
         res = wam_c(dataPoints,dim1);
+        print_2D_Array(res,dim1,dim1);
     }
     else if (strcmp(goal, "ddg") == 0){
         res = ddg_c(dataPoints,dim1);
+        print_2D_Array(res,dim1,dim1);
     }
     else if(strcmp(goal, "gl") == 0){
         res = gl_c(dataPoints,dim1);
+         print_2D_Array(res,dim1,dim1);
     }
     else if(strcmp(goal, "jacobi") == 0){
         res = jacobi_c(dataPoints,dim1);
+         print_2D_Array(res,dim1 + 1,dim2);
     }
-    print_2D_Array(res,dim1 + 1,dim2);
     delete_vectors(head_vec);
     free(head_cord);
     free_arr(linked_list_to_arr,dim1);
