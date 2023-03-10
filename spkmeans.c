@@ -691,15 +691,15 @@ int main(int argc, char** argv){
     }
     else if(strcmp(goal, "gl") == 0){
         res = gl_c(dataPoints,dim1);
-         print_2D_Array(res,dim1,dim1);
+        print_2D_Array(res,dim1,dim1);
     }
     else if(strcmp(goal, "jacobi") == 0){
         res = jacobi_c(dataPoints,dim1);
-         print_2D_Array(res,dim1 + 1,dim2);
+        print_2D_Array(res,dim1 + 1,dim2);
     }
     delete_vectors(head_vec);
     free(head_cord);
-    free_arr(linked_list_to_arr,dim1);
+    // free_arr(linked_list_to_arr,dim1);
     free_arr(res,dim1);
 
    return 0;
