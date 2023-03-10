@@ -121,6 +121,7 @@ double distance(double *xi, double *xj, int len){
     for (i = 0; i < len; i++){
         sum += pow(xi[i] - xj[i], 2);
     }
+    printf("sum = %lf \n", sum);
     sum = - sum / 2;
     return exp(sum);
 }
@@ -154,8 +155,6 @@ double calc_t(int i, int j, double **A){
 }
 double calc_c(int i, int j, double **A){
     double t = calc_t(i, j, A);
-
-
     double c = 1 / sqrt((t * t) + 1); 
     return c;
 }
