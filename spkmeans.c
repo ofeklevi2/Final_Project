@@ -406,7 +406,7 @@ double **sort_Rows(double **J_Transpose, int len){ // sort matrix by increasing 
     return res;
 }
 
-double **jacobi_c(double **A, int len){
+double **jacobi_c(double **A, int len, int sort){
     int i, j, iter;
     double c, s, sum1, sum2, **tmp, ***V_saver;
     int *ij;
@@ -487,23 +487,25 @@ double **jacobi_c(double **A, int len){
 
 
     //############################## Start spk() sort J code here #################################################
-    // J_Transpose = transpose(J, len + 1, len);  // (len + 1) : #rows of J, (len) - #cols of J
-    // if (J_Transpose == NULL){
-    //     return NULL;
-    // }  
-    // sorted_J_Transpose = sort_Rows(J_Transpose, len); 
-    
-    // //now transpose sorted_J_Transpose to get sorted_J
-    // for (i = 0; i < len + 1; i++){
-    //     for(j = 0; j < len; j++){
-    //         J[i][j] = sorted_J_Transpose[j][i];
-    //     }
-    // }
-    // //###########
-    // //free_arr(J_Transpose, len); // J_Transpose refuses to get deletedddddddddd
-    // //############
+    if (sort == 1){
+        J_Transpose = transpose(J, len + 1, len);  // (len + 1) : #rows of J, (len) - #cols of J
+        if (J_Transpose == NULL){
+            return NULL;
+        }  
+        sorted_J_Transpose = sort_Rows(J_Transpose, len); 
+        
+        //now transpose sorted_J_Transpose to get sorted_J
+        for (i = 0; i < len + 1; i++){
+            for(j = 0; j < len; j++){
+                J[i][j] = sorted_J_Transpose[j][i];
+            }
+        }
+        //###########
+        //free_arr(J_Transpose, len); // J_Transpose refuses to get deletedddddddddd
+        //############
+    }
 
-    //############################## End spk() sort J code here #################################################
+        //############################## End spk() sort J code here #################################################
     for (i = 0; i<iter; i++){
         free_arr(V_saver[i], len);
     }
@@ -709,7 +711,7 @@ int main(int argc, char** argv){
         print_2D_Array(res,dim1,dim1);
     }
     else if(strcmp(goal, "jacobi") == 0){
-        res = jacobi_c(dataPoints,dim1);
+        res = jacobi_c(dataPoints,dim1, 0);
         print_2D_Array(res,dim1 + 1,dim2);
     }
     delete_vectors(head_vec);
