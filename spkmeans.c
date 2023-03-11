@@ -115,13 +115,13 @@ void free_arr(double **arr, int rows){ //frees 2d array
     free(arr);
 }
 
-double distance(double *xi, double *xj, int len){
+double distance(double *xi, double *xj, int len, int vector_len){
     int i;
     double sum =0;
-    for (i = 0; i < len; i++){
+    for (i = 0; i < vector_len; i++){
         sum += pow(xi[i] - xj[i], 2);
     }
-    printf("sum = %lf \n", sum);
+    // printf("sum = %lf \n", sum);
     sum = - sum / 2;
     return exp(sum);
 }
@@ -264,7 +264,7 @@ double **I(int len){
 }
 
 
-double **wam_c(double **dataPoints, int len){
+double **wam_c(double **dataPoints, int len, int vector_len){
     int i, j;
     double **W = (double**)malloc(len * sizeof(double*));
     if (W == NULL){
@@ -283,7 +283,7 @@ double **wam_c(double **dataPoints, int len){
                 W[i][j] = 0;
             }
             else {
-                W[i][j] = distance(dataPoints[i], dataPoints[j], len);
+                W[i][j] = distance(dataPoints[i], dataPoints[j], len, vector_len);
                 W[j][i] = W[i][j];
              }
         }
@@ -293,9 +293,9 @@ double **wam_c(double **dataPoints, int len){
 }
 
 
-double **ddg_c(double **dataPoints, int len){
+double **ddg_c(double **dataPoints, int len, int vector_len){
     int i, j;
-    double **W = wam_c(dataPoints, len);
+    double **W = wam_c(dataPoints, len, vector_len);
     if (W == NULL){
         return NULL;
     }
@@ -318,7 +318,7 @@ double **ddg_c(double **dataPoints, int len){
     return D;
 }
 
-double **gl_c(double **dataPoints, int len){
+double **gl_c(double **dataPoints, int len, int vector_len){
     int i, j;
     double **W, **D, **L;
     L = (double**)malloc(len * sizeof(double*));
@@ -331,11 +331,11 @@ double **gl_c(double **dataPoints, int len){
             return NULL;
         }    
     }
-    W = wam_c(dataPoints, len);
+    W = wam_c(dataPoints, len, vector_len);
     if (W == NULL){
         return NULL;
     }
-    D = ddg_c(dataPoints, len);
+    D = ddg_c(dataPoints, len, vector_len);
     if (W == NULL){
         return NULL;
     }
@@ -473,7 +473,6 @@ double **jacobi_c(double **A, int len){
         iter++;
     }
 
-    
 
     for(j = 0; j < len; j++){ //first row of J contains eigenvalues
         J[0][j] = A[j][j];
@@ -531,9 +530,9 @@ void test_1(){
 
     dataPoint[0] = x1,   dataPoint[1] = x2,   dataPoint[2] = x3;
 
-    W = wam_c(dataPoint,len);
-    D = ddg_c(dataPoint, len);
-    L = gl_c(dataPoint, len);
+    W = wam_c(dataPoint,len,len);
+    D = ddg_c(dataPoint, len,len);
+    L = gl_c(dataPoint, len,len);
     P = build_Rotation_Matrix_P(L, len);
 
     // printf("W:\n");
@@ -584,9 +583,9 @@ void test_2(){
 
     dataPoint[0] = x1,   dataPoint[1] = x2,   dataPoint[2] = x3;
 
-    W = wam_c(dataPoint,len);
-    D = ddg_c(dataPoint, len);
-    L = gl_c(dataPoint, len);
+    W = wam_c(dataPoint,len,len);
+    D = ddg_c(dataPoint, len,len);
+    L = gl_c(dataPoint, len,len);
     P = build_Rotation_Matrix_P(L, len);
 
     // printf("W:\n");
@@ -624,6 +623,9 @@ void test_2(){
 
 
 int main(int argc, char** argv){
+    // test_1();
+    // return 0;
+
     struct vector *head_vec, *curr_vec;
     struct cord *head_cord, *curr_cord;
     double n, **res;
@@ -695,15 +697,15 @@ int main(int argc, char** argv){
     dim2 = vector_len(head_vec);
     double** dataPoints = linked_list_to_arr(head_vec, dim1,dim2);
     if (strcmp(goal, "wam") == 0){
-        res = wam_c(dataPoints,dim1);
+        res = wam_c(dataPoints,dim1,dim2);
         print_2D_Array(res,dim1,dim1);
     }
     else if (strcmp(goal, "ddg") == 0){
-        res = ddg_c(dataPoints,dim1);
+        res = ddg_c(dataPoints,dim1,dim2);
         print_2D_Array(res,dim1,dim1);
     }
     else if(strcmp(goal, "gl") == 0){
-        res = gl_c(dataPoints,dim1);
+        res = gl_c(dataPoints,dim1,dim2);
         print_2D_Array(res,dim1,dim1);
     }
     else if(strcmp(goal, "jacobi") == 0){
