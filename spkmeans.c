@@ -25,7 +25,7 @@ double **allocate_Memory(int rows, int cols){
     if (A == NULL){
         return NULL;
     }
-    for (i = 0; i < cols; i++){
+    for (i = 0; i < rows; i++){
         A[i] = (double*)calloc(cols, sizeof(double));
         if (A[i] == NULL){
         return NULL;
@@ -408,7 +408,7 @@ double **sort_Rows(double **J_Transpose, int len){ // sort matrix by increasing 
 
 double **jacobi_c(double **A, int len){
     int i, j, iter;
-    double c, s, sum1, sum2;
+    double c, s, sum1, sum2, **tmp, ***V_saver;
     int *ij;
     double **J = allocate_Memory(len + 1, len); // J for jacobi
     double **J_Transpose, **sorted_J_Transpose; 
@@ -423,8 +423,10 @@ double **jacobi_c(double **A, int len){
     double **P = build_Rotation_Matrix_P(A, len);
     if (P == NULL){
         return NULL;
-    } 
+    }
+    tmp = V;  
     V = matrix_Multiplication(V, P, len);
+    free_arr(tmp,len);
     if (V == NULL){
         return NULL;
     }   
@@ -439,7 +441,9 @@ double **jacobi_c(double **A, int len){
     get_A_Prime(i, j, A, len, c, s);
     free_arr(P, len);
     P = build_Rotation_Matrix_P(A, len);
+    tmp = V;
     V = matrix_Multiplication(V, P, len);
+    free_arr(tmp,len);
     if (P == NULL){
         return NULL;
     } 
@@ -448,6 +452,8 @@ double **jacobi_c(double **A, int len){
     free(ij);
 
     iter = 1;
+    V_saver = (double***) malloc (102 * sizeof(double**));
+    V_saver[0] = V;
     while (sum1 - sum2 > eps && iter < 100){
         sum1 = sum2;
         ij = find_Indexes_Of_Max_Element(A, len);
@@ -460,6 +466,7 @@ double **jacobi_c(double **A, int len){
         get_A_Prime(i, j, A, len, c, s);
         P = build_Rotation_Matrix_P(A, len);
         V = matrix_Multiplication(V, P, len);
+        V_saver[iter] = V;
         sum2 = off(A, len);
         free_arr(P, len);
         free(ij);
@@ -471,10 +478,12 @@ double **jacobi_c(double **A, int len){
         J[0][j] = A[j][j];
     }
     for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
-            J[i] = V[i - 1];
+        for (j = 0; j < len; j++){
+            J[i][j] = V[i - 1][j];
+        }
     }
-    // free_arr(A, len);
-    // free_arr(V, len);
+    free_arr(A, len);
+    
 
 
     //############################## Start spk() sort J code here #################################################
@@ -495,7 +504,10 @@ double **jacobi_c(double **A, int len){
     // //############
 
     //############################## End spk() sort J code here #################################################
-    // print_2D_Array(J, len + 1, len);
+    for (i = 0; i<iter; i++){
+        free_arr(V_saver[i], len);
+    }
+    free(V_saver);
     return J;
 }
 
@@ -702,7 +714,7 @@ int main(int argc, char** argv){
     }
     delete_vectors(head_vec);
     free(head_cord);
-    // free_arr(linked_list_to_arr,dim1);
+    free_arr(dataPoints,dim1);
     free_arr(res,dim1);
 
    return 0;
