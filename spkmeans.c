@@ -466,13 +466,12 @@ double **jacobi_c(double **A, int len){
         iter++;
     }
 
-    
 
     for(j = 0; j < len; j++){ //first row of J contains eigenvalues
         J[0][j] = A[j][j];
     }
     for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
-        J[i] = V[i - 1];
+            J[i] = V[i - 1];
     }
     // free_arr(A, len);
     // free_arr(V, len);
@@ -496,7 +495,7 @@ double **jacobi_c(double **A, int len){
     // //############
 
     //############################## End spk() sort J code here #################################################
-    print_2D_Array(J, len + 1, len);
+    // print_2D_Array(J, len + 1, len);
     return J;
 }
 
