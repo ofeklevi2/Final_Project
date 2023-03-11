@@ -19,11 +19,11 @@ typedef struct eigenvalue{
 
 }eigenvalue;
 
-double** wam_c(double **dataPoints, int len);
+double** wam_c(double **dataPoints, int len, int vector_len);
 
-double** ddg_c(double **dataPoints, int len);
+double** ddg_c(double **dataPoints, int len, int vector_len);
 
-double** gl_c(double **dataPoints, int len);
+double** gl_c(double **dataPoints, int len, int vector_len);
 
 void free_arr(double **arr, int len);
 
