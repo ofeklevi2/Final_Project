@@ -25,7 +25,7 @@ double **allocate_Memory(int rows, int cols){
     if (A == NULL){
         return NULL;
     }
-    for (i = 0; i < cols; i++){
+    for (i = 0; i < rows; i++){
         A[i] = (double*)calloc(cols, sizeof(double));
         if (A[i] == NULL){
         return NULL;
@@ -483,8 +483,8 @@ double **jacobi_c(double **A, int len){
             J[i][j] = V[i - 1][j];
         }
     }
-    // free_arr(A, len);
-    // free_arr(V, len);
+    free_arr(A, len);
+    
 
 
     //############################## Start spk() sort J code here #################################################
@@ -505,11 +505,10 @@ double **jacobi_c(double **A, int len){
     // //############
 
     //############################## End spk() sort J code here #################################################
-    //print_2D_Array(V_saver[iter-1],len,len);
-    //for (i = 0; i<iter-1; i++){
-        //free_arr(V_saver[i], len);
-    //}
-    //free(V_saver);
+    for (i = 0; i<iter; i++){
+        free_arr(V_saver[i], len);
+    }
+    free(V_saver);
     return J;
 }
 
