@@ -314,7 +314,7 @@ static PyObject* wam(PyObject *self, PyObject *args){
         return NULL; 
     }
     data_arr = py_to_c_arr(data_list,len,len);
-    res_as_arr = wam_c(data_arr,len);
+    res_as_arr = wam_c(data_arr,len,len);
     res_as_list = c_to_py_list(res_as_arr, len, len);
     free_arr(data_arr,len);
     free_arr(res_as_arr,len);
@@ -329,7 +329,7 @@ static PyObject* ddg(PyObject *self, PyObject *args){
         return NULL; 
     }
     data_arr = py_to_c_arr(data_list,len,len);
-    res_as_arr = ddg_c(data_arr,len);
+    res_as_arr = ddg_c(data_arr,len, len);
     res_as_list = c_to_py_list(res_as_arr, len, len);
     free_arr(data_arr,len);
     free_arr(res_as_arr,len);
@@ -344,10 +344,25 @@ static PyObject* gl(PyObject *self, PyObject *args){
         return NULL; 
     }
     data_arr = py_to_c_arr(data_list,len,len);
-    res_as_arr = gl_c(data_arr,len);
+    res_as_arr = gl_c(data_arr,len,len);
     res_as_list = c_to_py_list(res_as_arr, len, len);
     free_arr(data_arr,len);
     free_arr(res_as_arr,len);
+    return res_as_list;
+}
+
+static PyObject* jacobi(PyObject *self, PyObject *args){
+    int len,sort;
+    double **data_arr,**res_as_arr;
+    PyObject *data_list, *res_as_list;
+    if(!PyArg_ParseTuple(args, "Oii", &data_list,&len,&sort)) {
+        return NULL; 
+    }
+    data_arr = py_to_c_arr(data_list,len,len);
+    res_as_arr = jacobi_c(data_arr,len,sort);
+    res_as_list = c_to_py_list(res_as_arr, len+1, len);
+    free_arr(data_arr,len);
+    free_arr(res_as_arr,len+1);
     return res_as_list;
 }
 
@@ -389,6 +404,10 @@ static PyMethodDef spkmeansMethods[] = {
       PyDoc_STR("ddg doc")},
     {"gl",  
         (PyCFunction) gl, 
+      METH_VARARGS, 
+      PyDoc_STR("gl doc")},
+    {"jacobi",  
+        (PyCFunction) jacobi, 
       METH_VARARGS, 
       PyDoc_STR("gl doc")},
     {"spk",  
