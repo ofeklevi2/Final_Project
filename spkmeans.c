@@ -558,7 +558,7 @@ void test_1(){
     // printf("sum1 = %lf, sum2 = %lf, eps = %lf ", sum1, sum2, sum1 - sum2);
     // printf("\n");
 
-    jacobi_c(L, len);
+    jacobi_c(L, len, 0);
     // print_2D_Array(L, len);
 
     free(ij);
@@ -611,7 +611,7 @@ void test_2(){
     // printf("sum1 = %lf, sum2 = %lf, eps = %lf ", sum1, sum2, sum1 - sum2);
     // printf("\n");
 
-    jacobi_c(L, len);
+    jacobi_c(L, len, 0);
     // print_2D_Array(L, len);
 
     free(ij);
