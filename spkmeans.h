@@ -25,6 +25,8 @@ double** ddg_c(double **dataPoints, int len, int vector_len);
 
 double** gl_c(double **dataPoints, int len, int vector_len);
 
+double **jacobi_c(double **A, int len, int sort);
+
 void free_arr(double **arr, int len);
 
 int linked_list_len(struct vector *head_vec);
