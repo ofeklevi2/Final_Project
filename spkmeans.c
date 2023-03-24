@@ -48,7 +48,7 @@ void print_2D_Array(double **arr, int dim_1, int dim_2){
     for (i = 0; i < dim_1; i++){
         for (j = 0; j < dim_2; j++){
             if (arr[i][j] == 0) printf("0.0000");
-            else printf("%.7f", arr[i][j]);
+            else printf("%.4f", arr[i][j]);
             if (j != dim_2 - 1) printf(",");
         }
         printf("\n");
