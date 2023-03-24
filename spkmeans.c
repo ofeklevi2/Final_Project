@@ -396,13 +396,8 @@ double **sort_Rows(double **J_Transpose, int len){ // sort matrix by increasing 
             res[i][j] = arr[i].row[j];
         }
     }
-
-    //free arr
-    for (i = 0; i < len; i++){
-        free(arr[i].row);
-    }
     free(arr);
-    // free_arr(J_Transpose, len);
+
     return res;
 }
 
@@ -479,18 +474,11 @@ double **jacobi_c(double **A, int len, int sort){
     }
 
     for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
-        J[i] = V[i - 1];
+        for (j = 0; j < len; j++){
+            J[i][j] = V[i - 1][j];
+        }
     }
-
-
-    // for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
-    //     for (j = 0; j < len; j++){
-    //         J[i][j] = V[i - 1][j];
-    //     }
-    // }
-    // free_arr(A, len);
-    
-
+    free_arr(A, len);
 
     //############################## Start spk() sort J code here #################################################
     if (sort == 1){
@@ -506,16 +494,16 @@ double **jacobi_c(double **A, int len, int sort){
                 J[i][j] = sorted_J_Transpose[j][i];
             }
         }
-        //###########
-        //free_arr(J_Transpose, len); // J_Transpose refuses to get deletedddddddddd
-        //############
+        
+        free_arr(J_Transpose,len);
+        free_arr(sorted_J_Transpose,len); 
     }
 
         //############################## End spk() sort J code here #################################################
-    // for (i = 0; i<iter; i++){
-    //     free_arr(V_saver[i], len);
-    // }
-    // free(V_saver);
+    for (i = 0; i<iter; i++){
+        free_arr(V_saver[i], len);
+    }
+    free(V_saver);
     return J;
 }
 
@@ -706,24 +694,38 @@ int main(int argc, char** argv){
     double** dataPoints = linked_list_to_arr(head_vec, dim1,dim2);
     if (strcmp(goal, "wam") == 0){
         res = wam_c(dataPoints,dim1,dim2);
-        print_2D_Array(res,dim1,dim1);
+        
     }
     else if (strcmp(goal, "ddg") == 0){
         res = ddg_c(dataPoints,dim1,dim2);
-        print_2D_Array(res,dim1,dim1);
     }
     else if(strcmp(goal, "gl") == 0){
         res = gl_c(dataPoints,dim1,dim2);
-        print_2D_Array(res,dim1,dim1);
     }
     else if(strcmp(goal, "jacobi") == 0){
         res = jacobi_c(dataPoints,dim1, 0);
-        print_2D_Array(res,dim1 + 1,dim2);
     }
+
+    else if(strcmp(goal, "ofek") == 0){
+        res = jacobi_c(dataPoints,dim1, 1);
+    }
+
+    if (strcmp(goal, "jacobi") == 0){
+        print_2D_Array(res,dim1 + 1,dim2);
+        free_arr(res,dim1+1);
+    }
+    else if (strcmp(goal, "ofek") == 0){
+        print_2D_Array(res,dim1 + 1,dim2);
+        free_arr(res,dim1+1);
+    }
+    else{
+        print_2D_Array(res,dim1,dim1);
+        free_arr(res,dim1);   
+    }
+
     delete_vectors(head_vec);
     free(head_cord);
     free_arr(dataPoints,dim1);
-    free_arr(res,dim1);
 
    return 0;
 }

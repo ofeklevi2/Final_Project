@@ -9,7 +9,6 @@ def eigengapHuristic(eigenvalues):
     n = len(eigenvalues)
     if (n <= 1):
       return 0
-    eigenvalues.sort()
     deltas = [abs(eigenvalues[i]-eigenvalues[i+1]) for i in range(len(eigenvalues)-1)]
     relevant_deltas = np.array(deltas[:math.floor(n/2)])
     return np.argmax(relevant_deltas)
@@ -74,14 +73,15 @@ def main():
     elif (goal == "gl"):
         res = mykmeanssp.gl(dataPoints, len(dataPoints))
     elif (goal == "jacobi"):
-        res = mykmeanssp.jacobi(dataPoints, len(dataPoints))
+        res = mykmeanssp.jacobi(dataPoints, len(dataPoints),0)
     elif (goal == "spk"):
         gl = mykmeanssp.gl(dataPoints,len(dataPoints))
-        jacobi = mykmeanssp.jacobi(gl, len(gl))
+        jacobi = mykmeanssp.jacobi(gl, len(gl),1)
         if (len(args) == 2):
             K = eigengapHuristic(jacobi[0])
-        spectral_kmeans_vectors = np.array(jacobi[1:K+1])
-        spectral_kmeans_vectors = np.transpose(spectral_kmeans_vectors)
+        spectral_kmeans_vectors = [lst[:K] for lst in jacobi]
+        spectral_kmeans_vectors = spectral_kmeans_vectors [1:]
+        spectral_kmeans_vectors = np.array(spectral_kmeans_vectors)
         selected_indexes, initial_centroids = draw_initial_centroids(K, spectral_kmeans_vectors)
         spectral_kmeans_vectors = spectral_kmeans_vectors.tolist()
         for centroid in initial_centroids:
