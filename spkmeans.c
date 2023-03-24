@@ -48,7 +48,7 @@ void print_2D_Array(double **arr, int dim_1, int dim_2){
     for (i = 0; i < dim_1; i++){
         for (j = 0; j < dim_2; j++){
             if (arr[i][j] == 0) printf("0.0000");
-            else printf("%.4f", arr[i][j]);
+            else printf("%.7f", arr[i][j]);
             if (j != dim_2 - 1) printf(",");
         }
         printf("\n");
@@ -215,7 +215,7 @@ void get_A_Prime(int i, int j, double **A, int len, double c, double s){
     }
     ii = (c * c) * A[i][i] + (s * s) * A[j][j] - 2 * s * c * A[i][j]; 
     jj = (s * s) * A[i][i] + (c * c) * A[j][j] + 2 * s * c * A[i][j]; 
-    ij = 0;
+    ij = 0.0;
 
     A[i][i] = ii;
     A[j][j] = jj;
@@ -477,12 +477,18 @@ double **jacobi_c(double **A, int len, int sort){
     for(j = 0; j < len; j++){ //first row of J contains eigenvalues
         J[0][j] = A[j][j];
     }
+
     for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
-        for (j = 0; j < len; j++){
-            J[i][j] = V[i - 1][j];
-        }
+        J[i] = V[i - 1];
     }
-    free_arr(A, len);
+
+
+    // for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
+    //     for (j = 0; j < len; j++){
+    //         J[i][j] = V[i - 1][j];
+    //     }
+    // }
+    // free_arr(A, len);
     
 
 
@@ -506,10 +512,10 @@ double **jacobi_c(double **A, int len, int sort){
     }
 
         //############################## End spk() sort J code here #################################################
-    for (i = 0; i<iter; i++){
-        free_arr(V_saver[i], len);
-    }
-    free(V_saver);
+    // for (i = 0; i<iter; i++){
+    //     free_arr(V_saver[i], len);
+    // }
+    // free(V_saver);
     return J;
 }
 
@@ -635,7 +641,7 @@ int main(int argc, char** argv){
     int dim1,dim2;
     if (argc != 3){
         printf("An Error Has Occurred");
-        return NULL;
+        return 1;
     }
     goal = argv[1];
 
@@ -643,7 +649,7 @@ int main(int argc, char** argv){
     head_cord = calloc(1, sizeof(struct cord));
     if (head_cord == NULL){
         printf("An Error Has Occurred\n");
-        return NULL; 
+        return 1; 
     }
     
     curr_cord = head_cord;
@@ -652,7 +658,7 @@ int main(int argc, char** argv){
     head_vec = calloc(1, sizeof(struct vector));
     if (head_vec == NULL){  
         printf("An Error Has Occurred\n");
-        return NULL; 
+        return 1; 
     }
     curr_vec = head_vec;
     curr_vec->next = NULL;
@@ -660,7 +666,7 @@ int main(int argc, char** argv){
     FILE *input_data = fopen(argv[2], "r");
     if (input_data == NULL){
         printf("An Error Has Occurred\n");
-        return NULL;
+        return 1;
     }
     while (fscanf(input_data,"%lf%c", &n, &c) == 2)
         {
@@ -672,14 +678,14 @@ int main(int argc, char** argv){
                 curr_vec->next = calloc(1, sizeof(struct vector));
                 if (curr_vec->next == NULL){
                 printf("An Error Has Occurred\n");
-                return NULL; 
+                return 1; 
                 }
                 curr_vec = curr_vec->next;
                 curr_vec->next = NULL;
                 head_cord = malloc(sizeof(struct cord));
                 if (head_cord == NULL){
                 printf("An Error Has Occurred\n");
-                return NULL; 
+                return 1; 
                 }
                 curr_cord = head_cord;
                 curr_cord->next = NULL;
@@ -690,7 +696,7 @@ int main(int argc, char** argv){
             curr_cord->next = calloc(1, sizeof(struct cord));
             if (curr_cord->next == NULL){
             printf("An Error Has Occurred\n");
-            return NULL; 
+            return 1; 
             }
             curr_cord = curr_cord->next;
             curr_cord->next = NULL;
