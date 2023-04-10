@@ -307,14 +307,14 @@ struct vector* initialize_head_vec (double **data_arr, int dim_1, int dim_2){
 
 
 static PyObject* wam(PyObject *self, PyObject *args){
-    int len;
+    int len,vector_len;
     double **data_arr,**res_as_arr;
     PyObject *data_list, *res_as_list;
-    if(!PyArg_ParseTuple(args, "Oi", &data_list,&len)) {
+    if(!PyArg_ParseTuple(args, "Oii", &data_list,&len, &vector_len)) {
         return NULL; 
     }
-    data_arr = py_to_c_arr(data_list,len,len);
-    res_as_arr = wam_c(data_arr,len,len);
+    data_arr = py_to_c_arr(data_list,len, vector_len);
+    res_as_arr = wam_c(data_arr,len, vector_len);
     res_as_list = c_to_py_list(res_as_arr, len, len);
     free_arr(data_arr,len);
     free_arr(res_as_arr,len);
@@ -322,14 +322,14 @@ static PyObject* wam(PyObject *self, PyObject *args){
 }
 
 static PyObject* ddg(PyObject *self, PyObject *args){
-    int len;
+    int len, vector_len;
     double **data_arr,**res_as_arr;
     PyObject *data_list, *res_as_list;
-    if(!PyArg_ParseTuple(args, "Oi", &data_list,&len)) {
+    if(!PyArg_ParseTuple(args, "Oii", &data_list,&len,&vector_len)) {
         return NULL; 
     }
-    data_arr = py_to_c_arr(data_list,len,len);
-    res_as_arr = ddg_c(data_arr,len, len);
+    data_arr = py_to_c_arr(data_list,len,vector_len);
+    res_as_arr = ddg_c(data_arr,len, vector_len);
     res_as_list = c_to_py_list(res_as_arr, len, len);
     free_arr(data_arr,len);
     free_arr(res_as_arr,len);
@@ -337,14 +337,14 @@ static PyObject* ddg(PyObject *self, PyObject *args){
 }
 
 static PyObject* gl(PyObject *self, PyObject *args){
-    int len;
+    int len, vector_len;
     double **data_arr,**res_as_arr;
     PyObject *data_list, *res_as_list;
-    if(!PyArg_ParseTuple(args, "Oi", &data_list,&len)) {
+    if(!PyArg_ParseTuple(args, "Oii", &data_list,&len, &vector_len)) {
         return NULL; 
     }
-    data_arr = py_to_c_arr(data_list,len,len);
-    res_as_arr = gl_c(data_arr,len,len);
+    data_arr = py_to_c_arr(data_list,len,vector_len);
+    res_as_arr = gl_c(data_arr,len,vector_len);
     res_as_list = c_to_py_list(res_as_arr, len, len);
     free_arr(data_arr,len);
     free_arr(res_as_arr,len);
