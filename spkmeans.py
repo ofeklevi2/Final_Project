@@ -6,9 +6,8 @@ import sys
 np.random.seed(0)
 
 def eigengapHuristic(eigenvalues):
+    eigenvalues.sort()
     n = len(eigenvalues)
-    if (n <= 1):
-      return 0
     deltas = [abs(eigenvalues[i]-eigenvalues[i+1]) for i in range(len(eigenvalues)-1)]
     relevant_deltas = np.array(deltas[:math.floor(n/2)])
     return np.argmax(relevant_deltas)
@@ -67,11 +66,11 @@ def main():
     dataPoints = np.loadtxt(input_data,delimiter=",",dtype=float) 
     dataPoints = dataPoints.tolist()
     if (goal == "wam"):
-        res = mykmeanssp.wam(dataPoints, len(dataPoints))
+        res = mykmeanssp.wam(dataPoints, len(dataPoints),len(dataPoints[0]))
     elif (goal == "ddg"):
-        res = mykmeanssp.ddg(dataPoints, len(dataPoints))
+        res = mykmeanssp.ddg(dataPoints, len(dataPoints),len(dataPoints[0]))
     elif (goal == "gl"):
-        res = mykmeanssp.gl(dataPoints, len(dataPoints))
+        res = mykmeanssp.gl(dataPoints, len(dataPoints),len(dataPoints[0]))
     elif (goal == "jacobi"):
         res = mykmeanssp.jacobi(dataPoints, len(dataPoints),0)
     elif (goal == "spk"):
