@@ -107,7 +107,7 @@ int vector_len(vector *vec){
     }
     return cnt;
 }
-void free_arr(double **arr, int rows){ //frees 2d array 
+void free_arr(double **arr, int rows){ 
     int i;
     for (i=0; i < rows; i++){
         free(arr[i]);
@@ -115,13 +115,12 @@ void free_arr(double **arr, int rows){ //frees 2d array
     free(arr);
 }
 
-double distance(double *xi, double *xj, int len, int vector_len){
+double distance(double *xi, double *xj, int vector_len){
     int i;
     double sum =0;
     for (i = 0; i < vector_len; i++){
         sum += pow(xi[i] - xj[i], 2);
     }
-    // printf("sum = %lf \n", sum);
     sum = - sum / 2;
     return exp(sum);
 }
@@ -146,13 +145,12 @@ int *find_Indexes_Of_Max_Element(double **L, int len){
     return ij;
 }
 double calc_t(int i, int j, double **A){
-    double jj = A[j][j];
-    double ii = A[i][i];
     double theta = (A[j][j] - A[i][i]) / (2 * A[i][j]);
-    int sign = (theta >= 0) ? 1 : -1; //if theta >= 0 then sign = 1, else sign = -1
+    int sign = (theta >= 0) ? 1 : -1; 
     double t = sign / (fabs(theta) + sqrt((theta * theta) + 1));
     return t;
 }
+
 double calc_c(int i, int j, double **A){
     double t = calc_t(i, j, A);
     double c = 1 / sqrt((t * t) + 1); 
@@ -168,12 +166,12 @@ double calc_s(int i, int j, double **A){
 }
 
 double **build_Rotation_Matrix_P(double **A, int len){
-    int k,i,j;
+    int k,i,j, *ij;
     double **P = (double**)malloc(len * sizeof(double*));
     if (P == NULL){
         return NULL;
     }
-    int *ij = find_Indexes_Of_Max_Element(A, len);
+    ij = find_Indexes_Of_Max_Element(A, len);
     if (ij == NULL){
         return NULL;
     }
@@ -203,7 +201,7 @@ double **build_Rotation_Matrix_P(double **A, int len){
 }
 
 void get_A_Prime(int i, int j, double **A, int len, double c, double s){
-    int row, col;
+    int row;
     double ii, jj, ij;
     for (row =0; row < len; row++){
         if (row != i && row != j){
@@ -285,7 +283,7 @@ double **wam_c(double **dataPoints, int len, int vector_len){
                 W[i][j] = 0;
             }
             else {
-                W[i][j] = distance(dataPoints[i], dataPoints[j], len, vector_len);
+                W[i][j] = distance(dataPoints[i], dataPoints[j], vector_len);
                 W[j][i] = W[i][j];
              }
         }
@@ -297,21 +295,22 @@ double **wam_c(double **dataPoints, int len, int vector_len){
 
 double **ddg_c(double **dataPoints, int len, int vector_len){
     int i, j;
-    double **W = wam_c(dataPoints, len, vector_len);
+    double **W, **D;
+    W = wam_c(dataPoints, len, vector_len);
     if (W == NULL){
         return NULL;
     }
-    double **D = (double**)malloc(len * sizeof(double*));
+    D = (double**)malloc(len * sizeof(double*));
     if (D == NULL){
         return NULL;
     }
 
-    for (int i =0; i < len; i++){
+    for (i=0; i < len; i++){
         D[i] = (double*)calloc(len, sizeof(double));
     }
-    for (int i =0; i < len; i++){
+    for (i=0; i < len; i++){
         double sum = 0;
-        for (int j =0; j < len; j++){
+        for (j=0; j < len; j++){
             sum += W[i][j];
         }
         D[i][i] = sum;
@@ -352,7 +351,7 @@ double **gl_c(double **dataPoints, int len, int vector_len){
     return L;
 }
 
-double **transpose(double **J, int rows, int cols){ //rows is the #rows of J, cols is ther #cols of J
+double **transpose(double **J, int rows, int cols){ 
     int i, j;
     double **J_Transpose = allocate_Memory(cols, rows);
     if (J_Transpose == NULL){
@@ -366,7 +365,7 @@ double **transpose(double **J, int rows, int cols){ //rows is the #rows of J, co
     return J_Transpose;
 }
 
-int comparator (const void *x1, const void *x2){ // x1 and x2 are eigenvalue struct (rows of J_Transpose)
+int comparator (const void *x1, const void *x2){
     eigenvalue *a =  (eigenvalue*) x1;
     eigenvalue *b =  (eigenvalue*) x2;
 
@@ -377,14 +376,15 @@ int comparator (const void *x1, const void *x2){ // x1 and x2 are eigenvalue str
     else return 0;
 }
 
-double **sort_Rows(double **J_Transpose, int len){ // sort matrix by increasing order by its first entry of each row
-                                                   // len is number of rows == number of eigenvalues
+double **sort_Rows(double **J_Transpose, int len){ 
+                                                  
     int i, j;
+    double **res;
     eigenvalue *arr = (eigenvalue*)malloc(len * sizeof(eigenvalue));
     if (arr == NULL){
         return NULL;
     }
-    double **res = allocate_Memory(len, len + 1);
+    res = allocate_Memory(len, len + 1);
     if (res == NULL){
         return NULL;
     }
@@ -405,25 +405,20 @@ double **sort_Rows(double **J_Transpose, int len){ // sort matrix by increasing 
 
 
 double **jacobi_c(double **A, int len, int sort){
-
-    // printf("A:\n");
-    // print_2D_Array(A, len, len);
-    // printf("\n");
-
-    int i, j, iter = 0;
-    double c, s, sum1, sum2, **tmp, ***V_saver;
+    int i, j, iter;
+    double c, s, eps, sum1, sum2, **tmp, ***V_saver, **V, **J, **P, **J_Transpose, **sorted_J_Transpose;
+    iter = 0;
     int *ij;
-    double **J = allocate_Memory(len + 1, len); // J for jacobi
-    double **J_Transpose, **sorted_J_Transpose; 
+    J = allocate_Memory(len + 1, len); 
     if (J == NULL){
         return NULL;
     }
-    double **V = I(len);
+    V = I(len);
     if (V == NULL){
         return NULL;
     }
-    double eps = 1.0 * pow(10, -5);
-    double **P = build_Rotation_Matrix_P(A, len);
+    eps = 1.0 * pow(10, -5);
+    P = build_Rotation_Matrix_P(A, len);
     if (P == NULL){
         return NULL;
     }
@@ -480,30 +475,23 @@ double **jacobi_c(double **A, int len, int sort){
         
     }
 
-    for(j = 0; j < len; j++){ //first row of J contains eigenvalues
+    for(j = 0; j < len; j++){ 
         J[0][j] = A[j][j];
     }
 
-    for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
-        J[i] = V[i - 1];
+    for (i = 1; i < len + 1; i++){ 
+        for (j = 0; j < len; j++){
+            J[i][j] = V[i - 1][j];
+        }
     }
-    
-    // for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
-    //     for (j = 0; j < len; j++){
-    //         J[i][j] = V[i - 1][j];
-    //     }
-    // }
-    // free_arr(A, len);
 
-    //############################## Start spk() sort J code here #################################################
     if (sort == 1){
-        J_Transpose = transpose(J, len + 1, len);  // (len + 1) : #rows of J, (len) - #cols of J
+        J_Transpose = transpose(J, len + 1, len); 
         if (J_Transpose == NULL){
             return NULL;
         }  
         sorted_J_Transpose = sort_Rows(J_Transpose, len); 
         
-        //now transpose sorted_J_Transpose to get sorted_J
         for (i = 0; i < len + 1; i++){
             for(j = 0; j < len; j++){
                 J[i][j] = sorted_J_Transpose[j][i];
@@ -514,132 +502,21 @@ double **jacobi_c(double **A, int len, int sort){
         free_arr(sorted_J_Transpose,len); 
     }
 
-        //############################## End spk() sort J code here #################################################
-    // for (i = 0; i < 1 ; i++){
-    //     free_arr(V_saver[i], len);
-    // }
-    // free(V_saver);
+       
+    for (i = 0; i<iter; i++){
+        free_arr(V_saver[i], len);
+    }
+    free(V_saver);
+
     return J;
 }
 
-
-//################ Testers #########################
-void test_1(){
-    int i, j, len;
-    int *ij;
-    double c, s, sum1, sum2;
-    double **W, **D, **L, **P, **A_Prime;
-    double **dataPoint = malloc(3 * sizeof(double*));
-    double *x1 = malloc(3 * sizeof(double));
-    double *x2 = malloc(3 * sizeof(double));
-    double *x3 = malloc(3 * sizeof(double));
-
-    len = 3;
-    x1[0] = 1.0,       x1[1] = sqrt(2.0), x1[2] = 2.0;
-    x2[0] = sqrt(2.0), x2[1] = 3.0,       x2[2] = sqrt(2.0);
-    x3[0] = 2.0,       x3[1] = sqrt(2.0), x3[2] = 1.0;
-
-    dataPoint[0] = x1,   dataPoint[1] = x2,   dataPoint[2] = x3;
-
-    W = wam_c(dataPoint,len,len);
-    D = ddg_c(dataPoint, len,len);
-    L = gl_c(dataPoint, len,len);
-    P = build_Rotation_Matrix_P(L, len);
-
-    // printf("W:\n");
-    // print_2D_Array(W, len, len);
-    // printf("\nD:\n");
-    // print_2D_Array(D, len, len);
-    // printf("\nL:\n");
-    // print_2D_Array(L, len, len);
-    // printf("\nP:\n");
-    // print_2D_Array(P, len, len);
-    // printf("\n");
-    ij = find_Indexes_Of_Max_Element(L, len);
-    i = ij[0], j =ij[1];
-    c = calc_c(i, j, L);
-    s = calc_s(i, j, L);
-    // sum1 = off(L, len);
-    // get_A_Prime(i, j, L, len, c, s);
-    // print_2D_Array(L, 3);
-    // printf("\n");
-    // sum2 = off(L, len);
-    // printf("sum1 = %lf, sum2 = %lf, eps = %lf ", sum1, sum2, sum1 - sum2);
-    // printf("\n");
-
-    jacobi_c(L, len, 0);
-    // print_2D_Array(L, len);
-
-    free(ij);
-    free_arr(W, len);
-    free_arr(D, len);
-    free_arr(L, len);
-    free_arr(P, len);
-}
-
-void test_2(){
-    int i, j, len;
-    int *ij;
-    double c, s, sum1, sum2;
-    double **W, **D, **L, **P, **A_Prime;
-    double **dataPoint = malloc(3 * sizeof(double*));
-    double *x1 = malloc(3 * sizeof(double));
-    double *x2 = malloc(3 * sizeof(double));
-    double *x3 = malloc(3 * sizeof(double));
-
-    len = 3;
-    x1[0] = 1.0, x1[1] = 2.0, x1[2] = 3.0;
-    x2[0] = 1.1, x2[1] = 2.1, x2[2] = 3.1;
-    x3[0] = 1.2, x3[1] = 2.2, x3[2] = 3.2;
-
-    dataPoint[0] = x1,   dataPoint[1] = x2,   dataPoint[2] = x3;
-
-    W = wam_c(dataPoint,len,len);
-    D = ddg_c(dataPoint, len,len);
-    L = gl_c(dataPoint, len,len);
-    P = build_Rotation_Matrix_P(L, len);
-
-    // printf("W:\n");
-    // print_2D_Array(W, len);
-    // printf("\nD:\n");
-    // print_2D_Array(D, len);
-    // printf("\nL:\n");
-    // print_2D_Array(L, len, len);
-    // printf("\nP:\n");
-    // print_2D_Array(P, len);
-    // printf("\n");
-    ij = find_Indexes_Of_Max_Element(L, len);
-    i = ij[0], j =ij[1];
-    c = calc_c(i, j, L);
-    s = calc_s(i, j, L);
-    // sum1 = off(L, len);
-    // get_A_Prime(i, j, L, len, c, s);
-    // print_2D_Array(L, 3);
-    // printf("\n");
-    // sum2 = off(L, len);
-    // printf("sum1 = %lf, sum2 = %lf, eps = %lf ", sum1, sum2, sum1 - sum2);
-    // printf("\n");
-
-    jacobi_c(L, len, 0);
-    // print_2D_Array(L, len);
-
-    free(ij);
-    free_arr(W, len);
-    free_arr(D, len);
-    free_arr(L, len);
-    free_arr(P, len);
-}
-
-// ############### End of testers ##################
-
-
 int main(int argc, char** argv){
-    // test_1();
-    // return 0;
 
     struct vector *head_vec, *curr_vec;
     struct cord *head_cord, *curr_cord;
-    double n, **res;
+    FILE *input_data;
+    double n, **res, **dataPoints;
     char c, *goal;
     int dim1,dim2;
     if (argc != 3){
@@ -666,7 +543,7 @@ int main(int argc, char** argv){
     curr_vec = head_vec;
     curr_vec->next = NULL;
 
-    FILE *input_data = fopen(argv[2], "r");
+    input_data = fopen(argv[2], "r");
     if (input_data == NULL){
         printf("An Error Has Occurred\n");
         return 1;
@@ -706,7 +583,7 @@ int main(int argc, char** argv){
     }
     dim1 = linked_list_len(head_vec);
     dim2 = vector_len(head_vec);
-    double** dataPoints = linked_list_to_arr(head_vec, dim1,dim2);
+    dataPoints = linked_list_to_arr(head_vec, dim1,dim2);
     if (strcmp(goal, "wam") == 0){
         res = wam_c(dataPoints,dim1,dim2);
         
