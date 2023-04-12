@@ -6,11 +6,10 @@ import sys
 np.random.seed(0)
 
 def eigengapHuristic(eigenvalues):
-    eigenvalues.sort()
     n = len(eigenvalues)
     deltas = [abs(eigenvalues[i]-eigenvalues[i+1]) for i in range(len(eigenvalues)-1)]
     relevant_deltas = np.array(deltas[:math.floor(n/2)])
-    return np.argmax(relevant_deltas)
+    return np.argmax(relevant_deltas) + 1
 
 def draw_new_index(data,centroids,indexes):
     def D(vec,centroids):
@@ -74,7 +73,7 @@ def main():
     elif (goal == "jacobi"):
         res = mykmeanssp.jacobi(dataPoints, len(dataPoints),0)
     elif (goal == "spk"):
-        gl = mykmeanssp.gl(dataPoints,len(dataPoints))
+        gl = mykmeanssp.gl(dataPoints,len(dataPoints),len(dataPoints[0]))
         jacobi = mykmeanssp.jacobi(gl, len(gl),1)
         if (len(args) == 2):
             K = eigengapHuristic(jacobi[0])
