@@ -484,12 +484,6 @@ double **jacobi_c(double **A, int len, int sort){
             J[i][j] = V[i - 1][j];
         }
     }
-    
-    // for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
-    //     for (j = 0; j < len; j++){
-    //         J[i][j] = V[i - 1][j];
-    //     }
-    // }
 
     if (sort == 1){
         J_Transpose = transpose(J, len + 1, len); 
@@ -513,6 +507,12 @@ double **jacobi_c(double **A, int len, int sort){
     }
     free(V_saver);
 
+       
+    for (i = 0; i<iter; i++){
+        free_arr(V_saver[i], len);
+    }
+    free(V_saver);
+    
     return J;
 }
 
