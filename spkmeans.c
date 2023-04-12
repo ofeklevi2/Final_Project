@@ -250,13 +250,15 @@ double **matrix_Multiplication(double **A, double **B, int len){
 }
 
 double **I(int len){
-    int i;
+    int i, j;
     double **res = allocate_Memory(len, len);
     if (res == NULL){
         return NULL;
     }
     for (i = 0; i < len; i++){
-        res[i][i] = 1;
+        for (j = 0; j < len; j++){
+            res[i][j] = (i == j) ? 1.0 : 0.0;
+        }
     }
     return res;
 }
@@ -401,9 +403,11 @@ double **sort_Rows(double **J_Transpose, int len){
     return res;
 }
 
+
 double **jacobi_c(double **A, int len, int sort){
     int i, j, iter;
     double c, s, eps, sum1, sum2, **tmp, ***V_saver, **V, **J, **P, **J_Transpose, **sorted_J_Transpose;
+    iter = 0;
     int *ij;
     J = allocate_Memory(len + 1, len); 
     if (J == NULL){
@@ -418,12 +422,14 @@ double **jacobi_c(double **A, int len, int sort){
     if (P == NULL){
         return NULL;
     }
+    V_saver = (double***) malloc (102 * sizeof(double**));
     tmp = V;  
     V = matrix_Multiplication(V, P, len);
-    free_arr(tmp,len);
     if (V == NULL){
         return NULL;
-    }   
+    }  
+    V_saver[0] = V;
+    free_arr(tmp,len); 
     ij = find_Indexes_Of_Max_Element(A, len);
     if (ij == NULL){
         return NULL;
@@ -433,23 +439,26 @@ double **jacobi_c(double **A, int len, int sort){
     s = calc_s(i, j, A);
     sum1 = off(A, len);
     get_A_Prime(i, j, A, len, c, s);
-    free_arr(P, len);
-    P = build_Rotation_Matrix_P(A, len);
-    tmp = V;
-    V = matrix_Multiplication(V, P, len);
-    free_arr(tmp,len);
-    if (P == NULL){
-        return NULL;
-    } 
+    iter++;
     sum2 = off(A, len);
-    free_arr(P, len);
-    free(ij);
+    // printf("iter = %d\n", iter);
+    // printf("A:\n");
+    // print_2D_Array(A, len, len);
+    // printf("\n");
 
-    iter = 1;
-    V_saver = (double***) malloc (102 * sizeof(double**));
-    V_saver[0] = V;
+    free(ij);
+    free_arr(P, len);      
     while (sum1 - sum2 > eps && iter < 100){
         sum1 = sum2;
+        P = build_Rotation_Matrix_P(A, len);
+        tmp = V;
+        V = matrix_Multiplication(V, P, len);
+        V_saver[iter] = V;
+        free_arr(tmp,len);
+        if (P == NULL){
+            return NULL;
+        } 
+
         ij = find_Indexes_Of_Max_Element(A, len);
         if (ij == NULL){
             return NULL;
@@ -458,15 +467,13 @@ double **jacobi_c(double **A, int len, int sort){
         c = calc_c(i, j, A);
         s = calc_s(i, j, A);       
         get_A_Prime(i, j, A, len, c, s);
-        P = build_Rotation_Matrix_P(A, len);
-        V = matrix_Multiplication(V, P, len);
-        V_saver[iter] = V;
-        sum2 = off(A, len);
-        free_arr(P, len);
-        free(ij);
         iter++;
-    }
+        sum2 = off(A, len);
+        free(ij);
+        free_arr(P, len); 
 
+        
+    }
 
     for(j = 0; j < len; j++){ 
         J[0][j] = A[j][j];
@@ -477,7 +484,6 @@ double **jacobi_c(double **A, int len, int sort){
             J[i][j] = V[i - 1][j];
         }
     }
-    //free_arr(A, len);
 
     if (sort == 1){
         J_Transpose = transpose(J, len + 1, len); 
@@ -495,11 +501,13 @@ double **jacobi_c(double **A, int len, int sort){
         free_arr(J_Transpose,len);
         free_arr(sorted_J_Transpose,len); 
     }
+
        
     for (i = 0; i<iter; i++){
         free_arr(V_saver[i], len);
     }
     free(V_saver);
+
     return J;
 }
 
