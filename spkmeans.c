@@ -252,13 +252,15 @@ double **matrix_Multiplication(double **A, double **B, int len){
 }
 
 double **I(int len){
-    int i;
+    int i, j;
     double **res = allocate_Memory(len, len);
     if (res == NULL){
         return NULL;
     }
     for (i = 0; i < len; i++){
-        res[i][i] = 1;
+        for (j = 0; j < len; j++){
+            res[i][j] = (i == j) ? 1.0 : 0.0;
+        }
     }
     return res;
 }
@@ -401,8 +403,14 @@ double **sort_Rows(double **J_Transpose, int len){ // sort matrix by increasing 
     return res;
 }
 
+
 double **jacobi_c(double **A, int len, int sort){
-    int i, j, iter;
+
+    // printf("A:\n");
+    // print_2D_Array(A, len, len);
+    // printf("\n");
+
+    int i, j, iter = 0;
     double c, s, sum1, sum2, **tmp, ***V_saver;
     int *ij;
     double **J = allocate_Memory(len + 1, len); // J for jacobi
@@ -419,12 +427,14 @@ double **jacobi_c(double **A, int len, int sort){
     if (P == NULL){
         return NULL;
     }
+    V_saver = (double***) malloc (102 * sizeof(double**));
     tmp = V;  
     V = matrix_Multiplication(V, P, len);
-    free_arr(tmp,len);
     if (V == NULL){
         return NULL;
-    }   
+    }  
+    V_saver[0] = V;
+    free_arr(tmp,len); 
     ij = find_Indexes_Of_Max_Element(A, len);
     if (ij == NULL){
         return NULL;
@@ -434,23 +444,26 @@ double **jacobi_c(double **A, int len, int sort){
     s = calc_s(i, j, A);
     sum1 = off(A, len);
     get_A_Prime(i, j, A, len, c, s);
-    free_arr(P, len);
-    P = build_Rotation_Matrix_P(A, len);
-    tmp = V;
-    V = matrix_Multiplication(V, P, len);
-    free_arr(tmp,len);
-    if (P == NULL){
-        return NULL;
-    } 
+    iter++;
     sum2 = off(A, len);
-    free_arr(P, len);
-    free(ij);
+    // printf("iter = %d\n", iter);
+    // printf("A:\n");
+    // print_2D_Array(A, len, len);
+    // printf("\n");
 
-    iter = 1;
-    V_saver = (double***) malloc (102 * sizeof(double**));
-    V_saver[0] = V;
+    free(ij);
+    free_arr(P, len);      
     while (sum1 - sum2 > eps && iter < 100){
         sum1 = sum2;
+        P = build_Rotation_Matrix_P(A, len);
+        tmp = V;
+        V = matrix_Multiplication(V, P, len);
+        V_saver[iter] = V;
+        free_arr(tmp,len);
+        if (P == NULL){
+            return NULL;
+        } 
+
         ij = find_Indexes_Of_Max_Element(A, len);
         if (ij == NULL){
             return NULL;
@@ -459,26 +472,28 @@ double **jacobi_c(double **A, int len, int sort){
         c = calc_c(i, j, A);
         s = calc_s(i, j, A);       
         get_A_Prime(i, j, A, len, c, s);
-        P = build_Rotation_Matrix_P(A, len);
-        V = matrix_Multiplication(V, P, len);
-        V_saver[iter] = V;
-        sum2 = off(A, len);
-        free_arr(P, len);
-        free(ij);
         iter++;
-    }
+        sum2 = off(A, len);
+        free(ij);
+        free_arr(P, len); 
 
+        
+    }
 
     for(j = 0; j < len; j++){ //first row of J contains eigenvalues
         J[0][j] = A[j][j];
     }
 
     for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
-        for (j = 0; j < len; j++){
-            J[i][j] = V[i - 1][j];
-        }
+        J[i] = V[i - 1];
     }
-    free_arr(A, len);
+    
+    // for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
+    //     for (j = 0; j < len; j++){
+    //         J[i][j] = V[i - 1][j];
+    //     }
+    // }
+    // free_arr(A, len);
 
     //############################## Start spk() sort J code here #################################################
     if (sort == 1){
@@ -500,10 +515,10 @@ double **jacobi_c(double **A, int len, int sort){
     }
 
         //############################## End spk() sort J code here #################################################
-    for (i = 0; i<iter; i++){
-        free_arr(V_saver[i], len);
-    }
-    free(V_saver);
+    // for (i = 0; i < 1 ; i++){
+    //     free_arr(V_saver[i], len);
+    // }
+    // free(V_saver);
     return J;
 }
 
