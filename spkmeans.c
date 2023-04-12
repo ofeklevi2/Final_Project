@@ -407,8 +407,8 @@ double **sort_Rows(double **J_Transpose, int len){
 double **jacobi_c(double **A, int len, int sort){
     int i, j, iter;
     double c, s, eps, sum1, sum2, **tmp, ***V_saver, **V, **J, **P, **J_Transpose, **sorted_J_Transpose;
-    iter = 0;
     int *ij;
+    iter = 0;
     J = allocate_Memory(len + 1, len); 
     if (J == NULL){
         return NULL;
@@ -501,13 +501,18 @@ double **jacobi_c(double **A, int len, int sort){
         free_arr(J_Transpose,len);
         free_arr(sorted_J_Transpose,len); 
     }
-
        
     for (i = 0; i<iter; i++){
         free_arr(V_saver[i], len);
     }
     free(V_saver);
 
+       
+    for (i = 0; i<iter; i++){
+        free_arr(V_saver[i], len);
+    }
+    free(V_saver);
+    
     return J;
 }
 
