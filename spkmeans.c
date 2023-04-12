@@ -477,7 +477,7 @@ double **jacobi_c(double **A, int len, int sort){
             J[i][j] = V[i - 1][j];
         }
     }
-    free_arr(A, len);
+    //free_arr(A, len);
 
     if (sort == 1){
         J_Transpose = transpose(J, len + 1, len); 
