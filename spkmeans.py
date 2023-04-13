@@ -42,6 +42,10 @@ def format_print(elements, isInts = False):
         c = c[:-1]
         print(c)
         return 
+        
+    if (len(elements) == 1):
+        print("%.4f"%elements[0][0])
+        return
 
     for elem in elements:
         c = ""
@@ -52,7 +56,6 @@ def format_print(elements, isInts = False):
         print(c)
 
 def main():
-    print("main")
     args = sys.argv[1:]
     if (len(args) == 3):
         K = int(args[0])
@@ -64,6 +67,7 @@ def main():
         
     dataPoints = np.loadtxt(input_data,delimiter=",",dtype=float) 
     dataPoints = dataPoints.tolist()
+    
     if (goal == "wam"):
         res = mykmeanssp.wam(dataPoints, len(dataPoints),len(dataPoints[0]))
     elif (goal == "ddg"):
