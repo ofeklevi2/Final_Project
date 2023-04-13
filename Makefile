@@ -1,5 +1,5 @@
 CC = gcc 
-CFLAGS = -ansi -Wall -Wextra -Werror -pedantic-errors
+CFLAGS = -ansi -Wall -Wextra -Werror -pedantic-errors -lm
 
 spkmeans: spkmeans.o 
 	$(CC) -o spkmeans spkmeans.o $(CFLAGS)

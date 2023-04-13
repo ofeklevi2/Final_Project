@@ -367,8 +367,10 @@ double **transpose(double **J, int rows, int cols){
 }
 
 int comparator (const void *x1, const void *x2){ 
-    eigenvalue *a =  (eigenvalue*) x1;
-    eigenvalue *b =  (eigenvalue*) x2;
+    eigenvalue **y1 =  (eigenvalue**) x1;
+    eigenvalue **y2=  (eigenvalue**) x2;
+    eigenvalue *a = *y1;
+    eigenvalue *b = *y2;
 
     if (a->value < b->value) return -1;
     else if (a->value > b->value) return 1;
@@ -381,8 +383,9 @@ double **sort_Rows(double **J_Transpose, int len){
                                                   
     int i, j;
     double **res;
-    double val;
-    eigenvalue *arr = (eigenvalue*)malloc(len * sizeof(eigenvalue));
+
+    eigenvalue *a;
+    eigenvalue **arr = (eigenvalue**)malloc(len * sizeof(eigenvalue*));
     if (arr == NULL){
         return NULL;
     }
@@ -391,15 +394,24 @@ double **sort_Rows(double **J_Transpose, int len){
         return NULL;
     }
     for (i = 0 ; i < len; i++){
-        val = J_Transpose[i][0];
-        eigenvalue a = {.index = i, .value = val, .row = J_Transpose[i]};
+        a = (eigenvalue*) malloc (sizeof(eigenvalue));
+        if (a == NULL){
+            printf("An Error Has Occurred");
+            return NULL; 
+        }
+        a->index=i;
+        a->value=J_Transpose[i][0];
+        a->row = J_Transpose[i];
         arr[i] = a;
     }
-    qsort(arr, len, sizeof(eigenvalue), comparator);
+    qsort(arr, len, sizeof(eigenvalue*), comparator);
     for (i = 0; i < len; i++){
         for (j = 0; j < len + 1; j++){
-            res[i][j] = arr[i].row[j];
+            res[i][j] = arr[i]->row[j];
         }
+    }
+    for (i = 0 ; i < len; i++){
+        free(arr[i]);
     }
     free(arr);
 
@@ -409,20 +421,20 @@ double **sort_Rows(double **J_Transpose, int len){
 
 double **jacobi_c(double **A, int len, int sort){
 
-    int i, j, k, iter = 0;
-    double c, s, sum1, sum2, **tmp, ***V_saver;
+    int i, j, iter = 0;
+    double c, s, sum1, sum2, **tmp, ***V_saver, **V, eps, **P;
     int *ij;
-    double **J = allocate_Memory(len + 1, len); // J for jacobi
+    double **J = allocate_Memory(len + 1, len); 
     double **J_Transpose, **sorted_J_Transpose; 
     if (J == NULL){
         return NULL;
     }
-    double **V = I(len);
+    V = I(len);
     if (V == NULL){
         return NULL;
     }
-    double eps = 1.0 * pow(10, -5);
-    double **P = build_Rotation_Matrix_P(A, len);
+    eps = 1.0 * pow(10, -5);
+    P = build_Rotation_Matrix_P(A, len);
     if (P == NULL){
         return NULL;
     }
@@ -450,10 +462,8 @@ double **jacobi_c(double **A, int len, int sort){
     while (sum1 - sum2 > eps && iter < 100){
         sum1 = sum2;
         P = build_Rotation_Matrix_P(A, len);
-        //tmp = V;
         V = matrix_Multiplication(V, P, len);
         V_saver[iter] = V;
-        //free_arr(tmp,len);
         if (P == NULL){
             return NULL;
         } 
@@ -520,15 +530,15 @@ int main(int argc, char** argv){
 
     struct vector *head_vec, *curr_vec;
     struct cord *head_cord, *curr_cord;
-    double n, **res;
+    double n, **res, **dataPoints;
     char c, *goal;
     int dim1,dim2;
+    FILE *input_data;
     if (argc != 3){
         printf("An Error Has Occurred");
         return 1;
     }
     goal = argv[1];
-
 
     head_cord = calloc(1, sizeof(struct cord));
     if (head_cord == NULL){
@@ -547,7 +557,7 @@ int main(int argc, char** argv){
     curr_vec = head_vec;
     curr_vec->next = NULL;
 
-    FILE *input_data = fopen(argv[2], "r");
+    input_data = fopen(argv[2], "r");
     if (input_data == NULL){
         printf("An Error Has Occurred\n");
         return 1;
@@ -589,7 +599,7 @@ int main(int argc, char** argv){
     
     dim1 = linked_list_len(head_vec);
     dim2 = vector_len(head_vec);
-    double** dataPoints = linked_list_to_arr(head_vec, dim1,dim2);
+    dataPoints = linked_list_to_arr(head_vec, dim1,dim2);
     if (strcmp(goal, "wam") == 0){
         res = wam_c(dataPoints,dim1,dim2);
         
