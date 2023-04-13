@@ -380,6 +380,7 @@ int comparator (const void *x1, const void *x2){ // x1 and x2 are eigenvalue str
 double **sort_Rows(double **J_Transpose, int len){ // sort matrix by increasing order by its first entry of each row
                                                    // len is number of rows == number of eigenvalues
     int i, j;
+    double val;
     eigenvalue *arr = (eigenvalue*)malloc(len * sizeof(eigenvalue));
     if (arr == NULL){
         return NULL;
@@ -389,7 +390,8 @@ double **sort_Rows(double **J_Transpose, int len){ // sort matrix by increasing 
         return NULL;
     }
     for (i = 0 ; i < len; i++){
-        eigenvalue a = {.index = i, .value = J_Transpose[i][0], .row = J_Transpose[i]};
+        val = J_Transpose[i][0];
+        eigenvalue a = {.index = i, .value = val, .row = J_Transpose[i]};
         arr[i] = a;
     }
     qsort(arr, len, sizeof(eigenvalue), comparator);
@@ -406,7 +408,7 @@ double **sort_Rows(double **J_Transpose, int len){ // sort matrix by increasing 
 
 double **jacobi_c(double **A, int len, int sort){
 
-    int i, j, iter = 0;
+    int i, j, k, iter = 0;
     double c, s, sum1, sum2, **tmp, ***V_saver;
     int *ij;
     double **J = allocate_Memory(len + 1, len); // J for jacobi
@@ -472,6 +474,12 @@ double **jacobi_c(double **A, int len, int sort){
     }
 
     for(j = 0; j < len; j++){ //first row of J contains eigenvalues
+        if (A[j][j] < 0 && A[j][j] > -0.0001){
+            A[j][j] = 0;
+            for (k = 0; k < len; k++){
+                V[k][j] *= -1;
+            }
+        }
         J[0][j] = A[j][j];
     }
     
