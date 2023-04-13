@@ -383,6 +383,7 @@ double **sort_Rows(double **J_Transpose, int len){
                                                   
     int i, j;
     double **res;
+
     eigenvalue *a;
     eigenvalue **arr = (eigenvalue**)malloc(len * sizeof(eigenvalue*));
     if (arr == NULL){
@@ -484,6 +485,12 @@ double **jacobi_c(double **A, int len, int sort){
     }
 
     for(j = 0; j < len; j++){ 
+        if (A[j][j] < 0 && A[j][j] > -0.0001){
+            A[j][j] = 0;
+            for (k = 0; k < len; k++){
+                V[k][j] *= -1;
+            }
+        }
         J[0][j] = A[j][j];
     }
     
