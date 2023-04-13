@@ -621,8 +621,6 @@ void test_2(){
 
 
 int main(int argc, char** argv){
-    // test_1();
-    // return 0;
 
     struct vector *head_vec, *curr_vec;
     struct cord *head_cord, *curr_cord;
@@ -691,6 +689,8 @@ int main(int argc, char** argv){
             curr_cord = curr_cord->next;
             curr_cord->next = NULL;
     }
+    fclose(input_data);
+    
     dim1 = linked_list_len(head_vec);
     dim2 = vector_len(head_vec);
     double** dataPoints = linked_list_to_arr(head_vec, dim1,dim2);
