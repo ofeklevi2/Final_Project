@@ -406,10 +406,6 @@ double **sort_Rows(double **J_Transpose, int len){ // sort matrix by increasing 
 
 double **jacobi_c(double **A, int len, int sort){
 
-    // printf("A:\n");
-    // print_2D_Array(A, len, len);
-    // printf("\n");
-
     int i, j, iter = 0;
     double c, s, sum1, sum2, **tmp, ***V_saver;
     int *ij;
@@ -446,20 +442,15 @@ double **jacobi_c(double **A, int len, int sort){
     get_A_Prime(i, j, A, len, c, s);
     iter++;
     sum2 = off(A, len);
-    // printf("iter = %d\n", iter);
-    // printf("A:\n");
-    // print_2D_Array(A, len, len);
-    // printf("\n");
-
     free(ij);
     free_arr(P, len);      
     while (sum1 - sum2 > eps && iter < 100){
         sum1 = sum2;
         P = build_Rotation_Matrix_P(A, len);
-        tmp = V;
+        //tmp = V;
         V = matrix_Multiplication(V, P, len);
         V_saver[iter] = V;
-        free_arr(tmp,len);
+        //free_arr(tmp,len);
         if (P == NULL){
             return NULL;
         } 
@@ -483,17 +474,13 @@ double **jacobi_c(double **A, int len, int sort){
     for(j = 0; j < len; j++){ //first row of J contains eigenvalues
         J[0][j] = A[j][j];
     }
-
-    for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
-        J[i] = V[i - 1];
-    }
     
-    // for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
-    //     for (j = 0; j < len; j++){
-    //         J[i][j] = V[i - 1][j];
-    //     }
-    // }
-    // free_arr(A, len);
+    for (i = 1; i < len + 1; i++){ //The other rows are the corresponding eigenvectors of the first rows (which exactly idencial to V's rows)
+         for (j = 0; j < len; j++){
+             J[i][j] = V[i - 1][j];
+       }
+     }
+
 
     //############################## Start spk() sort J code here #################################################
     if (sort == 1){
@@ -515,10 +502,10 @@ double **jacobi_c(double **A, int len, int sort){
     }
 
         //############################## End spk() sort J code here #################################################
-    // for (i = 0; i < 1 ; i++){
-    //     free_arr(V_saver[i], len);
-    // }
-    // free(V_saver);
+    for (i = 0; i < iter ; i++){
+        free_arr(V_saver[i], len);
+    }
+    free(V_saver);
     return J;
 }
 
