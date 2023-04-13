@@ -381,7 +381,8 @@ double **sort_Rows(double **J_Transpose, int len){
                                                   
     int i, j;
     double **res;
-    eigenvalue *arr = (eigenvalue*)malloc(len * sizeof(eigenvalue));
+    eigenvalue *a;
+    eigenvalue **arr = (eigenvalue**)malloc(len * sizeof(eigenvalue*));
     if (arr == NULL){
         return NULL;
     }
@@ -390,13 +391,16 @@ double **sort_Rows(double **J_Transpose, int len){
         return NULL;
     }
     for (i = 0 ; i < len; i++){
-        eigenvalue a = {.index = i, .value = J_Transpose[i][0], .row = J_Transpose[i]};
+        a = (eigenvalue*) malloc (sizeof(eigenvalue));
+        a->index=i;
+        a->value=J_Transpose[i][0];
+        a->row = J_Transpose[i];
         arr[i] = a;
     }
     qsort(arr, len, sizeof(eigenvalue), comparator);
     for (i = 0; i < len; i++){
         for (j = 0; j < len + 1; j++){
-            res[i][j] = arr[i].row[j];
+            res[i][j] = arr[i]->row[j];
         }
     }
     free(arr);
@@ -593,7 +597,7 @@ int main(int argc, char** argv){
         res = gl_c(dataPoints,dim1,dim2);
     }
     else if(strcmp(goal, "jacobi") == 0){
-        res = jacobi_c(dataPoints,dim1, 0);
+        res = jacobi_c(dataPoints,dim1, 1);
     }
 
     if (strcmp(goal, "jacobi") == 0){
