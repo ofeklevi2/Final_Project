@@ -1,6 +1,6 @@
 # Spectral K-Means Clustering Implementation
 
-This project implements the spectral k-means clustering algorithm, which uses a hybrid approach integrating C for computational efficiency and Python for ease of interface and data handling.
+This project implements the unnormalized spectral k-means clustering algorithm, which uses a hybrid approach integrating C for computational efficiency and Python for ease of interface and data handling.
 
 ## Files Overview
 
